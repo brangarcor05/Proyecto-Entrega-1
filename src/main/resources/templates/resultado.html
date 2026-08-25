@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 5px; }
+        .dato { margin: 10px 0; padding: 10px; background: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>¡Datos Recibidos!</h1>
+    
+    <div class="card">
+        <div class="dato">
+            <span class="label">Nombre:</span> 
+            <span th:text="${nombre}"></span>
+        </div>
+        
+        <div class="dato">
+            <span class="label">Email:</span> 
+            <span th:text="${email}"></span>
+        </div>
+        
+        <div class="dato">
+            <span class="label">Edad:</span> 
+            <span th:text="${edad}"></span>
+        </div>
+        
+        <div class="dato">
+            <span class="label">Mensaje:</span> 
+            <span th:text="${mensaje}"></span>
+        </div>
+    </div>
+    
+    <br/>
+    <a href="/">← Volver al formulario</a>
+</body>
+</html>

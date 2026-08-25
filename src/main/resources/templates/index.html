@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Thymeleaf</title>
+</head>
+<body>
+    <h1>Formulario de Registro</h1>
+    
+    <form action="/procesar" method="post">
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" name="nombre" required/>
+        </div>
+        
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="email" required/>
+        </div>
+        
+        <div class="form-group">
+            <label>Edad:</label>
+            <input type="number" name="edad" required/>
+        </div>
+        
+        <div class="form-group">
+            <label>Mensaje:</label>
+            <textarea name="mensaje" rows="4"></textarea>
+        </div>
+        
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>
