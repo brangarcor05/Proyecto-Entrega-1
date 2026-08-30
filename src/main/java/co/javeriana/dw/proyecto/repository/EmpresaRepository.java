@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 
-    List<Enpresa> findAllByOrderByIdAsc();
+    List<Empresa> findAllByOrderByIdAsc();
 }
