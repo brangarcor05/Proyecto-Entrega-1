@@ -8,5 +8,8 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 
     List<Empresa> findAllByOrderByIdAsc();
 
+<<<<<<< HEAD
 }
 
+=======
+>>>>>>> 05e26fa566eab0cb8c63197e7bc337b389f85462
