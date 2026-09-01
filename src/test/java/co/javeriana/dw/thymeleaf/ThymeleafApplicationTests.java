@@ -1,4 +1,4 @@
-package co.javeriana.dw.proyecto;
+package co.javeriana.dw.thymeleaf;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
