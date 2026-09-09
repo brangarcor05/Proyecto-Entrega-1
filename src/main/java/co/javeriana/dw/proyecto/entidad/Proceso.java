@@ -1,17 +1,11 @@
 package co.javeriana.dw.proyecto.entidad;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+
 
 @Entity
 @Table(
@@ -23,6 +17,9 @@ import jakarta.persistence.UniqueConstraint;
         )
     }
 )
+@Getter
+@Setter
+@NoArgsConstructor
 public class Proceso {
 
     @Id
@@ -63,11 +60,6 @@ public class Proceso {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
-    /*
-     Constructor vacío requerido por JPA.
-     */
-    public Proceso() {
-    }
 
     /*
      Constructor para crear un proceso nuevo.
@@ -87,59 +79,4 @@ public class Proceso {
         this.activo = true;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Empresa getEmpresa() {
-        return empresa;
-    }
-
-    public void setEmpresa(Empresa empresa) {
-        this.empresa = empresa;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
-    public EstadoProceso getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoProceso estado) {
-        this.estado = estado;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
 }
