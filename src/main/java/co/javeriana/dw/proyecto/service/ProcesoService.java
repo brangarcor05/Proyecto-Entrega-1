@@ -1,75 +1,121 @@
 package co.javeriana.dw.proyecto.service;
 
-import java.util.List;
-import java.util.Optional;
-import org.springframework.stereotype.Service;
 import co.javeriana.dw.proyecto.entidad.Empresa;
-import co.javeriana.dw.proyecto.entidad.EstadoProceso;
+import co.javeriana.dw.proyecto.entidad.Pool;
 import co.javeriana.dw.proyecto.entidad.Proceso;
+import co.javeriana.dw.proyecto.entidad.Usuario;
+import co.javeriana.dw.proyecto.entidad.AccionHistorial;
+import co.javeriana.dw.proyecto.entidad.EstadoProceso;
+import co.javeriana.dw.proyecto.entidad.RolUsuario;
+import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
+import co.javeriana.dw.proyecto.exception.PermisoDenegadoException;
+import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
+import co.javeriana.dw.proyecto.repository.PoolRepository;
 import co.javeriana.dw.proyecto.repository.ProcesoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcesoService {
+
     private final ProcesoRepository procesoRepository;
+    private final PoolRepository poolRepository;
+    private final HistorialService historialService;
 
-    public ProcesoService(ProcesoRepository procesoRepository) {
+    public ProcesoService(ProcesoRepository procesoRepository, PoolRepository poolRepository,
+                           HistorialService historialService) {
         this.procesoRepository = procesoRepository;
+        this.poolRepository = poolRepository;
+        this.historialService = historialService;
     }
 
-    public Proceso guardar(Proceso proceso) {
-        Optional<Proceso> procesoExistente = procesoRepository.findByEmpresaAndNombre(proceso.getEmpresa(), proceso.getNombre());
-        if (procesoExistente.isPresent() && !procesoExistente.get().getId().equals(proceso.getId())) {
-            throw new IllegalArgumentException("Ya existe un proceso con ese nombre en la empresa.");
-        }
-        return procesoRepository.save(proceso);
-    }
-
-    public List<Proceso> listarTodos() {
-        return procesoRepository.findAllByOrderByIdAsc();
-    }
-
-    public Optional<Proceso> buscarPorId(Long id) {
-        return procesoRepository.findById(id);
-    }
-
-    public List<Proceso> listarPorEmpresa(Empresa empresa) {
-        return procesoRepository.findByEmpresaAndActivo(empresa,true);
-    }
-
-    public List<Proceso> listarPorEmpresaYEstado(Empresa empresa, EstadoProceso estado) {
-        return procesoRepository.findByEmpresaAndActivoAndEstado(empresa,true, estado);
-    }
-
-    public List<Proceso> listarPorEmpresaYCategoria(Empresa empresa, String categoria) {
-        return procesoRepository.findByEmpresaAndActivoAndCategoria(empresa,true, categoria);
-    }
-
-    public Proceso actualizar(Proceso proceso) {
-        if (proceso.getId() == null) {
-            throw new IllegalArgumentException("El proceso debe tener un ID para ser actualizado.");
-        }
-        if (!procesoRepository.existsById(proceso.getId())) {
-            throw new IllegalArgumentException("El proceso no existe.");
-        }
-        return guardar(proceso);
-    }
-
-    public void eliminar(Long id) {
-        Optional<Proceso> proceso = procesoRepository.findById(id);
-        if (proceso.isEmpty()) {
-            throw new IllegalArgumentException("El proceso no existe.");
+    @Transactional
+    public Proceso crear(Empresa empresa, String nombre, String descripcion, String categoria,
+                          Usuario usuarioCreador) {
+        if (procesoRepository.existsByNombreAndEmpresaId(nombre, empresa.getId())) {
+            throw new NombreDuplicadoException("Ya existe un proceso llamado '" + nombre + "' en esta empresa");
         }
 
-        Proceso procesoExistente = proceso.get();
-        procesoExistente.setActivo(false);
-        procesoRepository.save(procesoExistente);
+        Proceso proceso = new Proceso();
+        proceso.setNombre(nombre);
+        proceso.setDescripcion(descripcion);
+        proceso.setCategoria(categoria);
+        proceso.setEstado(EstadoProceso.BORRADOR);
+        proceso.setEmpresa(empresa);
+        proceso = procesoRepository.save(proceso);
+
+        // HU-04: "al crearlo queda listo para agregarle elementos, con el pool de la
+        // empresa ya definido" — se crea el pool propietario automáticamente.
+        Pool poolPropietario = new Pool();
+        poolPropietario.setNombre(empresa.getNombre());
+        poolPropietario.setEsPropietario(true);
+        poolPropietario.setCajaNegra(false);
+        poolPropietario.setProceso(proceso);
+        poolRepository.save(poolPropietario);
+
+        historialService.registrar("Proceso", proceso.getId(), AccionHistorial.CREACION,
+                usuarioCreador, proceso, "Proceso creado");
+        return proceso;
     }
 
-    public List<Proceso> listarPorEstado(Empresa empresa, EstadoProceso estado) {
-        return procesoRepository.findByEmpresaAndEstado(empresa, estado);
+    @Transactional
+    public Proceso editar(Long procesoId, String nombre, String descripcion, String categoria,
+                           EstadoProceso estado, Usuario usuarioEditor) {
+        validarPuedeEditar(usuarioEditor);
+        Proceso proceso = obtenerPorId(procesoId);
+
+        boolean cambioNombre = !proceso.getNombre().equals(nombre);
+        if (cambioNombre && procesoRepository.existsByNombreAndEmpresaId(nombre, proceso.getEmpresa().getId())) {
+            throw new NombreDuplicadoException("Ya existe un proceso llamado '" + nombre + "' en esta empresa");
+        }
+
+        proceso.setNombre(nombre);
+        proceso.setDescripcion(descripcion);
+        proceso.setCategoria(categoria);
+        proceso.setEstado(estado);
+        proceso = procesoRepository.save(proceso);
+
+        historialService.registrar("Proceso", proceso.getId(), AccionHistorial.EDICION,
+                usuarioEditor, proceso, "Datos del proceso actualizados");
+        return proceso;
     }
 
-    public List<Proceso> listarPorCategoria(Empresa empresa, String categoria) {
-        return procesoRepository.findByEmpresaAndCategoria(empresa,categoria);
+    @Transactional
+    public void eliminar(Long procesoId, Usuario usuarioAdministrador) {
+        if (usuarioAdministrador.getRolUsuario() != RolUsuario.ADMIN) {
+            throw new PermisoDenegadoException("Solo un administrador puede eliminar procesos");
+        }
+        Proceso proceso = obtenerPorId(procesoId);
+        proceso.setEstado(EstadoProceso.INACTIVO); // eliminación lógica (HU-06)
+        procesoRepository.save(proceso);
+
+        historialService.registrar("Proceso", proceso.getId(), AccionHistorial.ELIMINACION,
+                usuarioAdministrador, proceso, "Proceso marcado como inactivo");
+    }
+
+    public Page<Proceso> consultar(Long empresaId, String nombre, String categoria,
+                                    EstadoProceso estado, Pageable pageable) {
+        // HU-06: "un proceso inactivo deja de aparecer en el listado por defecto"
+        if (estado == null) {
+            return procesoRepository.findByEmpresaIdAndEstadoNot(empresaId, EstadoProceso.INACTIVO, pageable);
+        }
+        if (nombre != null && !nombre.isBlank()) {
+            return procesoRepository.findByEmpresaIdAndNombreContainingIgnoreCaseAndEstado(
+                    empresaId, nombre, estado, pageable);
+        }
+        return procesoRepository.findByEmpresaIdAndCategoriaAndEstado(empresaId, categoria, estado, pageable);
+    }
+
+    private void validarPuedeEditar(Usuario usuario) {
+        if (usuario.getRolUsuario() == RolUsuario.LECTURA) {
+            throw new PermisoDenegadoException("Los usuarios de solo lectura no pueden editar procesos");
+        }
+    }
+
+    private Proceso obtenerPorId(Long id) {
+        return procesoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Proceso no encontrado: " + id));
     }
 }

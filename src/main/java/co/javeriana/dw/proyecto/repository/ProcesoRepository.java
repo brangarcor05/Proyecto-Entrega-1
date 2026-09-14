@@ -1,20 +1,20 @@
 package co.javeriana.dw.proyecto.repository;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import co.javeriana.dw.proyecto.entidad.Empresa;
-import co.javeriana.dw.proyecto.entidad.Proceso;
+
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
+import co.javeriana.dw.proyecto.entidad.Proceso;
 
 
-public interface ProcesoRepository extends JpaRepository<Proceso,Long>{
-    List<Proceso> findAllByOrderByIdAsc();
-    List<Proceso> findByEmpresa(Empresa empresa);
-    List<Proceso> findByEmpresaAndActivo(Empresa empresa, boolean activo);
-    Optional<Proceso> findByEmpresaAndNombre(Empresa empresa, String nombre);
-    List<Proceso> findByEmpresaAndEstado(Empresa empresa, EstadoProceso estado);
-    List<Proceso> findByEmpresaAndCategoria(Empresa empresa, String categoria);
-    List<Proceso> findByEmpresaAndActivoAndEstado( Empresa empresa, boolean activo, EstadoProceso estado);
-    List<Proceso> findByEmpresaAndActivoAndCategoria( Empresa empresa, boolean activo, String categoria);
+
+public interface ProcesoRepository extends JpaRepository<Proceso, Long> {
+    
+    boolean existsByNombreAndEmpresaId(String nombre, Long empresaId);
+    Page<Proceso> findByEmpresaIdAndEstadoNot(Long empresaId, EstadoProceso estadoExcluido, Pageable pageable);
+    Page<Proceso> findByEmpresaIdAndNombreContainingIgnoreCaseAndEstado(Long empresaId, String nombre, EstadoProceso estado, Pageable pageable);
+    Page<Proceso> findByEmpresaIdAndCategoriaAndEstado(Long empresaId, String categoria, EstadoProceso estado, Pageable pageable);
+    Page<Proceso> findByEmpresasCompartidasId(Long empresaId, Pageable pageable);
+    boolean existsByIdAndEmpresasCompartidasId(Long procesoId, Long empresaId);
 }

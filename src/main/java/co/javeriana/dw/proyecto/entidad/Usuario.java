@@ -50,8 +50,8 @@ public class Usuario {
     @Column(name = "rol_acceso", nullable = false)
     private RolUsuario rolUsuario;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
     @Column(nullable = false, length = 20)
     private String rol;
