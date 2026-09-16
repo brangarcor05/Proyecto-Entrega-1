@@ -1,6 +1,7 @@
 package co.javeriana.dw.proyecto.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import co.javeriana.dw.proyecto.dto.historial.HistorialResponse;
 import co.javeriana.dw.proyecto.dto.proceso.ActualizarProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.ProcesoResponse;
@@ -56,6 +58,12 @@ public class ProcesoController {
     @GetMapping("/{id}")
     public ResponseEntity<ProcesoResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(procesoService.obtener(id));
+    }
+
+    /** HU-07: "Se puede consultar el historial de cambios del proceso". */
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<List<HistorialResponse>> consultarHistorial(@PathVariable Long id) {
+        return ResponseEntity.ok(procesoService.consultarHistorial(id));
     }
 
     @PostMapping

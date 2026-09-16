@@ -1,7 +1,11 @@
 package co.javeriana.dw.proyecto.service;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import co.javeriana.dw.proyecto.dto.historial.HistorialResponse;
 import co.javeriana.dw.proyecto.entidad.AccionHistorial;
 import co.javeriana.dw.proyecto.entidad.Historial;
 import co.javeriana.dw.proyecto.entidad.Proceso;
@@ -27,5 +31,13 @@ public class HistorialService {
         h.setProceso(proceso);
         h.setDetalle(detalle);
         historialRepository.save(h);
+    }
+
+    /** HU-07: "Se puede consultar el historial de cambios del proceso", del mas reciente al mas antiguo. */
+    @Transactional(readOnly = true)
+    public List<HistorialResponse> listarPorProceso(Long procesoId) {
+        return historialRepository.findByProcesoIdOrderByFechaDesc(procesoId).stream()
+                .map(HistorialResponse::desde)
+                .toList();
     }
 }

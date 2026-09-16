@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import co.javeriana.dw.proyecto.dto.historial.HistorialResponse;
 import co.javeriana.dw.proyecto.dto.proceso.ActualizarProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.ProcesoResponse;
@@ -112,6 +113,15 @@ public class ProcesoService {
         return ProcesoResponse.desde(obtenerActivo(procesoId));
     }
 
+    /** HU-07: historial de cambios del proceso. Se valida que el proceso exista. */
+    @Transactional(readOnly = true)
+    public List<HistorialResponse> consultarHistorial(Long procesoId) {
+        if (!procesoRepository.existsById(procesoId)) {
+            throw new RecursoNoEncontradoException("Proceso no encontrado: " + procesoId);
+        }
+        return historialService.listarPorProceso(procesoId);
+    }
+
     /**
      * Listado de HU-07: acotado a una empresa, con busqueda por nombre y filtros
      * combinables de estado y categoria. Los tres se aplican a la vez cuando se envian
@@ -163,8 +173,11 @@ public class ProcesoService {
                 usuarioAdministrador, proceso, "Proceso marcado como inactivo");
     }
 
+    /** HU-05: "Solo usuarios con rol administrador o editor pueden modificar". */
     private void validarPuedeEditar(Usuario usuario) {
-        if (usuario.getRolUsuario() == RolUsuario.LECTURA) {
+        boolean puedeEditar = usuario.getRolUsuario() == RolUsuario.ADMIN
+                || usuario.getRolUsuario() == RolUsuario.EDITOR;
+        if (!puedeEditar) {
             throw new PermisoDenegadoException("Los usuarios de solo lectura no pueden editar procesos");
         }
     }
