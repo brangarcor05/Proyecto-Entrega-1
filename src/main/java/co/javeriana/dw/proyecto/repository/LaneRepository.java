@@ -13,4 +13,7 @@ public interface LaneRepository extends JpaRepository<Lane, Long> {
     boolean existsByRolProcesoIdAndActivoTrue(Long rolProcesoId);
 
     boolean existsByPoolIdAndRolProcesoId(Long poolId, Long rolProcesoId);
+
+    // HU-21: un pool con lanes no se puede eliminar ni volver caja negra
+    boolean existsByPoolIdAndActivoTrue(Long poolId);
 }

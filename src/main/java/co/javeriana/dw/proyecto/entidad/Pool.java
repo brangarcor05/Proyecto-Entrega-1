@@ -31,6 +31,14 @@ public class Pool {
     @Column(name = "es_propietario", nullable = false)
     private boolean esPropietario = false; // true = pool de la empresa dueña del proceso
 
+    /*
+     Eliminación lógica: ningún elemento se borra físicamente, para no perder
+     la trazabilidad del diagrama.
+     */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean activo = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proceso_id", nullable = false)
     private Proceso proceso;
