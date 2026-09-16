@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import co.javeriana.dw.proyecto.dto.historial.HistorialResponse;
 import co.javeriana.dw.proyecto.dto.proceso.ActualizarProcesoRequest;
+import co.javeriana.dw.proyecto.dto.proceso.CompartirProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.ProcesoResponse;
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
@@ -42,6 +43,7 @@ public class ProcesoController {
         this.procesoService = procesoService;
     }
 
+    /** HU-07 y HU-23: los procesos de la empresa mas los que le compartieron. */
     @GetMapping
     public ResponseEntity<Page<ProcesoResponse>> consultar(
             @RequestParam Long empresaId,
@@ -56,14 +58,20 @@ public class ProcesoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProcesoResponse> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(procesoService.obtener(id));
+    public ResponseEntity<ProcesoResponse> buscarPorId(
+            @PathVariable Long id,
+            @RequestParam Long empresaId) {
+
+        return ResponseEntity.ok(procesoService.obtener(id, empresaId));
     }
 
     /** HU-07: "Se puede consultar el historial de cambios del proceso". */
     @GetMapping("/{id}/historial")
-    public ResponseEntity<List<HistorialResponse>> consultarHistorial(@PathVariable Long id) {
-        return ResponseEntity.ok(procesoService.consultarHistorial(id));
+    public ResponseEntity<List<HistorialResponse>> consultarHistorial(
+            @PathVariable Long id,
+            @RequestParam Long empresaId) {
+
+        return ResponseEntity.ok(procesoService.consultarHistorial(id, empresaId));
     }
 
     @PostMapping
@@ -86,6 +94,16 @@ public class ProcesoController {
             @RequestParam Long usuarioId) {
 
         return ResponseEntity.ok(procesoService.actualizar(id, request, usuarioId));
+    }
+
+    /** HU-23: define que otras empresas pueden consultar el proceso, en solo lectura. */
+    @PutMapping("/{id}/comparticion")
+    public ResponseEntity<ProcesoResponse> compartir(
+            @PathVariable Long id,
+            @Valid @RequestBody CompartirProcesoRequest request,
+            @RequestParam Long usuarioId) {
+
+        return ResponseEntity.ok(procesoService.compartir(id, request, usuarioId));
     }
 
     @DeleteMapping("/{id}")
