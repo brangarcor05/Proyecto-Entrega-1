@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import co.javeriana.dw.proyecto.entidad.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    Optional<Usuario> findByCorreo(String correo);
-    boolean existsByCorreo(String correo);
+    Optional<Usuario> findByEmail(String correo);
+    boolean existsByEmail(String correo);
     List<Usuario> findByEmpresaId(Long empresaId);
 }

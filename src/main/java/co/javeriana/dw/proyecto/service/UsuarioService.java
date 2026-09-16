@@ -29,7 +29,7 @@ public class UsuarioService {
     // administrador inicial con las credenciales del representante"
     @Transactional
     public Usuario crearAdministradorInicial(Empresa empresa, String correo, String passwordPlano) {
-        if (usuarioRepository.existsByCorreo(correo)) {
+        if (usuarioRepository.existsByEmail(correo)) {
             throw new NombreDuplicadoException("Ya existe un usuario con el correo " + correo);
         }
         Usuario admin = new Usuario();
@@ -42,7 +42,7 @@ public class UsuarioService {
 
     @Transactional
     public Usuario invitarUsuario(Empresa empresa, String correo, RolUsuario rolUsuario) {
-        if (usuarioRepository.existsByCorreo(correo)) {
+        if (usuarioRepository.existsByEmail(correo)) {
             throw new NombreDuplicadoException("El correo " + correo + " ya está registrado");
         }
         Usuario usuario = new Usuario();
@@ -73,7 +73,7 @@ public class UsuarioService {
     }
 
     public Usuario autenticar(String correo, String passwordPlano) {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
+        Usuario usuario = usuarioRepository.findByEmail(correo)
                 .orElseThrow(CredencialesInvalidasException::new);
         if (!usuario.isActivo() || !passwordEncoder.matches(passwordPlano, usuario.getPasswordHash())) {
             throw new CredencialesInvalidasException();
