@@ -30,6 +30,13 @@ public class ManejadorGlobalExcepciones {
                 .body(ErrorResponse.de(409, "Conflicto", ex.getMessage()));
     }
 
+    @ExceptionHandler(ReglaNegocioException.class)
+    public ResponseEntity<ErrorResponse> manejarReglaNegocio(ReglaNegocioException ex) {
+        // La operacion es valida para el usuario, pero rompe una regla del modelo.
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.de(409, "Conflicto", ex.getMessage()));
+    }
+
     @ExceptionHandler(PermisoDenegadoException.class)
     public ResponseEntity<ErrorResponse> manejarPermisoDenegado(PermisoDenegadoException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)

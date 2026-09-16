@@ -9,17 +9,16 @@ import co.javeriana.dw.proyecto.dto.pool.ActualizarPoolRequest;
 import co.javeriana.dw.proyecto.dto.pool.CrearPoolRequest;
 import co.javeriana.dw.proyecto.dto.pool.PoolResponse;
 import co.javeriana.dw.proyecto.entidad.AccionHistorial;
+import co.javeriana.dw.proyecto.entidad.EstadoProceso;
 import co.javeriana.dw.proyecto.entidad.Pool;
 import co.javeriana.dw.proyecto.entidad.Proceso;
-import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.entidad.Usuario;
-import co.javeriana.dw.proyecto.exception.PermisoDenegadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
+import co.javeriana.dw.proyecto.exception.ReglaNegocioException;
 import co.javeriana.dw.proyecto.repository.LaneRepository;
 import co.javeriana.dw.proyecto.repository.NodoProcesoRepository;
 import co.javeriana.dw.proyecto.repository.PoolRepository;
 import co.javeriana.dw.proyecto.repository.ProcesoRepository;
-import co.javeriana.dw.proyecto.repository.UsuarioRepository;
 
 /**
  * Pools del diagrama (HU-21). Un pool es un participante del proceso: la empresa
@@ -31,19 +30,19 @@ public class PoolService {
 
     private final PoolRepository poolRepository;
     private final ProcesoRepository procesoRepository;
-    private final UsuarioRepository usuarioRepository;
     private final LaneRepository laneRepository;
     private final NodoProcesoRepository nodoProcesoRepository;
+    private final PermisoService permisoService;
     private final HistorialService historialService;
 
     public PoolService(PoolRepository poolRepository, ProcesoRepository procesoRepository,
-                       UsuarioRepository usuarioRepository, LaneRepository laneRepository,
-                       NodoProcesoRepository nodoProcesoRepository, HistorialService historialService) {
+                       LaneRepository laneRepository, NodoProcesoRepository nodoProcesoRepository,
+                       PermisoService permisoService, HistorialService historialService) {
         this.poolRepository = poolRepository;
         this.procesoRepository = procesoRepository;
-        this.usuarioRepository = usuarioRepository;
         this.laneRepository = laneRepository;
         this.nodoProcesoRepository = nodoProcesoRepository;
+        this.permisoService = permisoService;
         this.historialService = historialService;
     }
 
@@ -53,12 +52,8 @@ public class PoolService {
      */
     @Transactional
     public PoolResponse crear(CrearPoolRequest request, Long usuarioId) {
-        Usuario usuario = obtenerUsuario(usuarioId);
-        validarPuedeEditar(usuario);
-
-        Proceso proceso = procesoRepository.findById(request.procesoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe el proceso " + request.procesoId()));
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
+        Proceso proceso = obtenerProcesoActivo(request.procesoId());
 
         Pool pool = new Pool();
         pool.setNombre(request.nombre());
@@ -75,8 +70,7 @@ public class PoolService {
 
     @Transactional
     public PoolResponse actualizar(Long poolId, ActualizarPoolRequest request, Long usuarioId) {
-        Usuario usuario = obtenerUsuario(usuarioId);
-        validarPuedeEditar(usuario);
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
         Pool pool = obtenerActivo(poolId);
 
         // HU-21: "un pool de participante externo se modela como caja negra, sin
@@ -84,7 +78,7 @@ public class PoolService {
         // dejaria el diagrama incoherente.
         boolean seVuelveCajaNegra = request.cajaNegra() && !pool.isCajaNegra();
         if (seVuelveCajaNegra && tieneContenido(poolId)) {
-            throw new PermisoDenegadoException(
+            throw new ReglaNegocioException(
                     "El pool tiene lanes o elementos adentro: no puede marcarse como caja negra "
                             + "hasta que se vacie");
         }
@@ -105,9 +99,7 @@ public class PoolService {
 
     @Transactional(readOnly = true)
     public List<PoolResponse> listarPorProceso(Long procesoId) {
-        if (!procesoRepository.existsById(procesoId)) {
-            throw new RecursoNoEncontradoException("No existe el proceso " + procesoId);
-        }
+        obtenerProcesoActivo(procesoId);
         return poolRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
                 .map(PoolResponse::desde)
                 .toList();
@@ -119,18 +111,15 @@ public class PoolService {
      */
     @Transactional
     public void eliminar(Long poolId, Long usuarioId) {
-        Usuario usuario = obtenerUsuario(usuarioId);
-        if (usuario.getRolUsuario() != RolUsuario.ADMIN) {
-            throw new PermisoDenegadoException("Solo un administrador puede eliminar pools");
-        }
+        Usuario usuario = permisoService.validarEsAdministrador(usuarioId);
         Pool pool = obtenerActivo(poolId);
 
         if (pool.isEsPropietario()) {
-            throw new PermisoDenegadoException(
+            throw new ReglaNegocioException(
                     "El pool de la empresa propietaria no se puede eliminar");
         }
         if (tieneContenido(poolId)) {
-            throw new PermisoDenegadoException(
+            throw new ReglaNegocioException(
                     "El pool tiene lanes o elementos adentro: primero deben reasignarse o eliminarse");
         }
 
@@ -146,22 +135,14 @@ public class PoolService {
                 || nodoProcesoRepository.existsByPoolIdAndActivoTrue(poolId);
     }
 
-    /** HU-21: "solo usuarios con permisos de edicion pueden crear o modificar pools". */
-    private void validarPuedeEditar(Usuario usuario) {
-        boolean puedeEditar = usuario.getRolUsuario() == RolUsuario.ADMIN
-                || usuario.getRolUsuario() == RolUsuario.EDITOR;
-        if (!puedeEditar) {
-            throw new PermisoDenegadoException("Los usuarios de solo lectura no pueden modificar pools");
-        }
-    }
-
     private Pool obtenerActivo(Long id) {
         return poolRepository.findByIdAndActivoTrue(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pool no encontrado: " + id));
     }
 
-    private Usuario obtenerUsuario(Long id) {
-        return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + id));
+    /** Un proceso eliminado no admite cambios en su diagrama. */
+    private Proceso obtenerProcesoActivo(Long procesoId) {
+        return procesoRepository.findByIdAndEstadoNot(procesoId, EstadoProceso.INACTIVO)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Proceso no encontrado: " + procesoId));
     }
 }
