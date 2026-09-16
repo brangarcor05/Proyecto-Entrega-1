@@ -10,5 +10,5 @@ import co.javeriana.dw.proyecto.entidad.RolUsuario;
 
 public interface PermisoPoolRepository extends JpaRepository<PermisoPool, Long> {
     List<PermisoPool> findByEmpresaId(Long empresaId);
-    Optional<PermisoPool> findByEmpresaIdAndRolAcceso(Long empresaId, RolUsuario rolAcceso);
+    Optional<PermisoPool> findByEmpresaIdAndRolUsuario(Long empresaId, RolUsuario rolAcceso);
 }
