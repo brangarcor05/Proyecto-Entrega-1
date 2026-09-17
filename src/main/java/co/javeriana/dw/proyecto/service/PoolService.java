@@ -13,6 +13,7 @@ import co.javeriana.dw.proyecto.entidad.EstadoProceso;
 import co.javeriana.dw.proyecto.entidad.Pool;
 import co.javeriana.dw.proyecto.entidad.Proceso;
 import co.javeriana.dw.proyecto.entidad.Usuario;
+import co.javeriana.dw.proyecto.exception.PermisoDenegadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.exception.ReglaNegocioException;
 import co.javeriana.dw.proyecto.repository.LaneRepository;
@@ -52,8 +53,10 @@ public class PoolService {
      */
     @Transactional
     public PoolResponse crear(CrearPoolRequest request, Long usuarioId) {
-        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
         Proceso proceso = obtenerProcesoActivo(request.procesoId());
+        Usuario usuario = permisoService.validarPuedeCrearPoolsYLanes(
+                usuarioId, proceso.getEmpresa().getId());
+        validarEsDeLaEmpresa(usuario, proceso);
 
         Pool pool = new Pool();
         pool.setNombre(request.nombre());
@@ -70,8 +73,10 @@ public class PoolService {
 
     @Transactional
     public PoolResponse actualizar(Long poolId, ActualizarPoolRequest request, Long usuarioId) {
-        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
         Pool pool = obtenerActivo(poolId);
+        Usuario usuario = permisoService.validarPuedeEditarPoolsYLanes(
+                usuarioId, pool.getProceso().getEmpresa().getId());
+        validarEsDeLaEmpresa(usuario, pool.getProceso());
 
         // HU-21: "un pool de participante externo se modela como caja negra, sin
         // elementos internos". Volver caja negra un pool que ya tiene contenido
@@ -111,8 +116,10 @@ public class PoolService {
      */
     @Transactional
     public void eliminar(Long poolId, Long usuarioId) {
-        Usuario usuario = permisoService.validarEsAdministrador(usuarioId);
         Pool pool = obtenerActivo(poolId);
+        Usuario usuario = permisoService.validarPuedeEliminarPoolsYLanes(
+                usuarioId, pool.getProceso().getEmpresa().getId());
+        validarEsDeLaEmpresa(usuario, pool.getProceso());
 
         if (pool.isEsPropietario()) {
             throw new ReglaNegocioException(
@@ -133,6 +140,14 @@ public class PoolService {
     private boolean tieneContenido(Long poolId) {
         return laneRepository.existsByPoolIdAndActivoTrue(poolId)
                 || nodoProcesoRepository.existsByPoolIdAndActivoTrue(poolId);
+    }
+
+    /** HU-03: el diagrama de un proceso solo lo modifica la empresa que lo creo. */
+    private void validarEsDeLaEmpresa(Usuario usuario, Proceso proceso) {
+        if (!usuario.getEmpresa().getId().equals(proceso.getEmpresa().getId())) {
+            throw new PermisoDenegadoException(
+                    "El proceso pertenece a otra empresa: el acceso compartido es de solo lectura");
+        }
     }
 
     private Pool obtenerActivo(Long id) {

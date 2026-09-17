@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "empresas",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_empresa_runt", columnNames = "runt"),
+           @UniqueConstraint(name = "uk_empresa_ruc", columnNames = "ruc"),
            @UniqueConstraint(name = "uk_empresa_email", columnNames = "email")
        })
 @SQLDelete(sql = "UPDATE empresas SET estado = 'INACTIVO' WHERE id = ?")
