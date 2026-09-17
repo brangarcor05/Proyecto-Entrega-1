@@ -1,4 +1,4 @@
-package co.javeriana.dw.proyecto.dto.usuario;
+package co.javeriana.dw.proyecto.dto.autenticacion;
 
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import lombok.AllArgsConstructor;
@@ -8,12 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioResponse {
-    private Long id;
+public class SesionResponse {
+    private Long usuarioId;
     private String nombre;
     private String email;
     private RolUsuario rolUsuario;
-    private boolean activo;
     private Long empresaId;
     private String empresaNombre;
 }

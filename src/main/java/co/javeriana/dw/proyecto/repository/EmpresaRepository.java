@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import co.javeriana.dw.proyecto.entidad.Empresa;
 
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
-    Optional<Empresa> findByRuc(String nit);
-    boolean existsByRuc(String nit);
+    Optional<Empresa> findByRut(String rut);
+    boolean existsByRut(String rut);
+    boolean existsByEmail(String email);
 }

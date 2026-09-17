@@ -21,10 +21,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
     name = "usuarios",
-    uniqueConstraints = @UniqueConstraint(
-        name = "uk_usuario_empresa_email",
-        columnNames = {"empresa_id", "email"}
-    )
+    uniqueConstraints = @UniqueConstraint(name = "uk_usuario_email", columnNames = "email")
 )
 @Data
 @Builder
@@ -43,7 +40,7 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -52,9 +49,6 @@ public class Usuario {
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
-
-    @Column(nullable = false, length = 20)
-    private String rol;
 
     @Column(nullable = false)
     @Builder.Default
