@@ -1,6 +1,7 @@
 package co.javeriana.dw.proyecto.dto.usuario;
 
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,12 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioResponse {
-    private Long id;
-    private String nombre;
-    private String email;
+public class CambiarRolRequest {
+
+    @NotNull(message = "El nuevo rol de acceso es obligatorio")
     private RolUsuario rolUsuario;
-    private boolean activo;
-    private Long empresaId;
-    private String empresaNombre;
 }

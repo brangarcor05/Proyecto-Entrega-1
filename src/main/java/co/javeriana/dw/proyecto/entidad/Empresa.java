@@ -35,7 +35,7 @@ public class Empresa {
     private String nombre;
 
     @Column(nullable = false, length = 20, unique = true)
-    private String ruc;
+    private String rut;
 
     @Column(name = "razon_social", nullable = false, length = 200)
     private String razonSocial;

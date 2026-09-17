@@ -1,12 +1,18 @@
 package co.javeriana.dw.proyecto.service;
 
+import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
+import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
+import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
+import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
+import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
 import co.javeriana.dw.proyecto.entidad.Empresa;
-import co.javeriana.dw.proyecto.entidad.Usuario;
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
+import co.javeriana.dw.proyecto.entidad.Usuario;
 import co.javeriana.dw.proyecto.exception.CredencialesInvalidasException;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.repository.UsuarioRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,70 +25,73 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+                           ModelMapper modelMapper) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
-    // Lo llama EmpresaService al registrar la empresa (HU-01): "se genera un usuario
-    // administrador inicial con las credenciales del representante"
     @Transactional
-    public Usuario crearAdministradorInicial(Empresa empresa, String correo, String passwordPlano) {
+    public Usuario crearAdministradorInicial(Empresa empresa, String nombre, String correo, String passwordPlano) {
         if (usuarioRepository.existsByEmail(correo)) {
             throw new NombreDuplicadoException("Ya existe un usuario con el correo " + correo);
         }
-        Usuario admin = new Usuario();
-        admin.setEmail(correo);
-        admin.setPasswordHash(passwordEncoder.encode(passwordPlano));
-        admin.setRolUsuario(RolUsuario.ADMIN);
-        admin.setEmpresa(empresa);
+        Usuario admin = Usuario.builder()
+                .empresa(empresa)
+                .nombre(nombre)
+                .email(correo)
+                .passwordHash(passwordEncoder.encode(passwordPlano))
+                .rolUsuario(RolUsuario.ADMIN)
+                .activo(true)
+                .build();
         return usuarioRepository.save(admin);
     }
 
     @Transactional
-    public Usuario invitarUsuario(Empresa empresa, String correo, RolUsuario rolUsuario) {
-        if (usuarioRepository.existsByEmail(correo)) {
-            throw new NombreDuplicadoException("El correo " + correo + " ya está registrado");
+    public UsuarioResponse invitarUsuario(Empresa empresa, CrearUsuarioRequest request) {
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
+            throw new NombreDuplicadoException("El correo " + request.getEmail() + " ya está registrado");
         }
-        Usuario usuario = new Usuario();
-        usuario.setEmail(correo);
-        // Contraseña temporal aleatoria: el flujo real de invitación (token + link para
-        // que el usuario la defina) queda fuera de esta HU puntual — avísame si lo
-        // quieres modelar ahora o lo dejamos para cuando montemos el envío de correos.
-        usuario.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
-        usuario.setRolUsuario(rolUsuario);
+
+        
+        Usuario usuario = modelMapper.map(request, Usuario.class);
         usuario.setEmpresa(empresa);
-        return usuarioRepository.save(usuario);
+        usuario.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        usuario.setActivo(true);
+
+        return modelMapper.map(usuarioRepository.save(usuario), UsuarioResponse.class);
     }
 
     @Transactional
-    public Usuario cambiarRolAcceso(Long usuarioId, RolUsuario nuevoRol) {
+    public UsuarioResponse cambiarRolAcceso(Long usuarioId, CambiarRolRequest request) {
         Usuario usuario = obtenerPorId(usuarioId);
-        usuario.setRolUsuario(nuevoRol);
-        return usuarioRepository.save(usuario);
+        modelMapper.map(request, usuario); 
+        return modelMapper.map(usuarioRepository.save(usuario), UsuarioResponse.class);
     }
 
     @Transactional
     public void desactivar(Long usuarioId) {
         Usuario usuario = obtenerPorId(usuarioId);
         usuario.setActivo(false);
-        // No se tocan sus procesos: "si el usuario se desactiva, sus procesos siguen
-        // disponibles" (HU-02) — Proceso no tiene FK a Usuario, así que esto ya se cumple solo.
         usuarioRepository.save(usuario);
     }
 
-    public Usuario autenticar(String correo, String passwordPlano) {
-        Usuario usuario = usuarioRepository.findByEmail(correo)
+    public SesionResponse autenticar(LoginRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow(CredencialesInvalidasException::new);
-        if (!usuario.isActivo() || !passwordEncoder.matches(passwordPlano, usuario.getPasswordHash())) {
+        if (!usuario.isActivo() || !passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
             throw new CredencialesInvalidasException();
         }
-        return usuario;
+        return modelMapper.map(usuario, SesionResponse.class);
     }
 
-    public List<Usuario> listarPorEmpresa(Long empresaId) {
-        return usuarioRepository.findByEmpresaId(empresaId);
+    public List<UsuarioResponse> listarPorEmpresa(Long empresaId) {
+        return usuarioRepository.findByEmpresaId(empresaId).stream()
+                .map(u -> modelMapper.map(u, UsuarioResponse.class))
+                .toList();
     }
 
     private Usuario obtenerPorId(Long id) {
