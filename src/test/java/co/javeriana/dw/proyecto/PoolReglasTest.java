@@ -188,6 +188,6 @@ class PoolReglasTest {
     private Usuario crearUsuario(String email, RolUsuario rol) {
         return usuarioRepository.save(Usuario.builder()
                 .empresa(empresa).nombre("Usuario " + rol).email(email)
-                .rolUsuario(rol).rol(rol.name()).passwordHash("x").build());
+                .rolUsuario(rol).passwordHash("x").build());
     }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class EmpresaResponse {
     private Long id;
     private String nombre;
-    private String ruc;
+    private String rut;
     private String razonSocial;
     private String email;
     private String telefono;

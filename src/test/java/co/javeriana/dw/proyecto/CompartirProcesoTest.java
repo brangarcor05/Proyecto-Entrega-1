@@ -171,7 +171,6 @@ class CompartirProcesoTest {
                 .nombre("Admin de " + empresa.getNombre())
                 .email(email)
                 .rolUsuario(RolUsuario.ADMIN)
-                .rol(RolUsuario.ADMIN.name())
                 .passwordHash("no-importa-para-esta-prueba")
                 .build());
     }
