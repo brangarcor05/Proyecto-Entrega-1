@@ -86,7 +86,7 @@ class ArcoReglasTest {
     @BeforeEach
     void prepararDiagrama() {
         empresa = empresaRepository.save(Empresa.builder()
-                .nombre("Alpina").ruc("900111").razonSocial("Alpina S.A.").email("alpina@x.com").build());
+                .nombre("Alpina").rut("900111").razonSocial("Alpina S.A.").email("alpina@x.com").build());
         admin = crearUsuario("admin@x.com", RolUsuario.ADMIN);
         editor = crearUsuario("editor@x.com", RolUsuario.EDITOR);
         lector = crearUsuario("lector@x.com", RolUsuario.LECTURA);

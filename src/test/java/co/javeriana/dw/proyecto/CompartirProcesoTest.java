@@ -156,10 +156,10 @@ class CompartirProcesoTest {
                         new CompartirProcesoRequest(true, Set.of()), adminDuena.getId()));
     }
 
-    private Empresa crearEmpresa(String nombre, String ruc, String email) {
+    private Empresa crearEmpresa(String nombre, String rut, String email) {
         return empresaRepository.save(Empresa.builder()
                 .nombre(nombre)
-                .ruc(ruc)
+                .rut(rut)
                 .razonSocial(nombre + " S.A.")
                 .email(email)
                 .build());
