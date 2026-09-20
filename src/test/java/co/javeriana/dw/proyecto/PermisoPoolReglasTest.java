@@ -51,7 +51,7 @@ class PermisoPoolReglasTest {
     @BeforeEach
     void prepararDatos() {
         empresa = empresaRepository.save(Empresa.builder()
-                .nombre("Alpina").ruc("900111").razonSocial("Alpina S.A.").email("alpina@x.com").build());
+                .nombre("Alpina").rut("900111").razonSocial("Alpina S.A.").email("alpina@x.com").build());
         admin = crearUsuario(empresa, "admin@x.com", RolUsuario.ADMIN);
         editor = crearUsuario(empresa, "editor@x.com", RolUsuario.EDITOR);
         lector = crearUsuario(empresa, "lector@x.com", RolUsuario.LECTURA);
@@ -128,7 +128,7 @@ class PermisoPoolReglasTest {
                 "Un editor configuro los permisos");
 
         Empresa otra = empresaRepository.save(Empresa.builder()
-                .nombre("Postobon").ruc("900222").razonSocial("Postobon S.A.").email("p@x.com").build());
+                .nombre("Postobon").rut("900222").razonSocial("Postobon S.A.").email("p@x.com").build());
         Usuario adminOtra = crearUsuario(otra, "admin-otra@x.com", RolUsuario.ADMIN);
 
         permisoPoolService.configurar(
@@ -142,7 +142,7 @@ class PermisoPoolReglasTest {
     @DisplayName("Un usuario de otra empresa no puede tocar el diagrama de un proceso ajeno")
     void unUsuarioDeOtraEmpresaNoTocaElDiagramaAjeno() {
         Empresa otra = empresaRepository.save(Empresa.builder()
-                .nombre("Postobon").ruc("900222").razonSocial("Postobon S.A.").email("p@x.com").build());
+                .nombre("Postobon").rut("900222").razonSocial("Postobon S.A.").email("p@x.com").build());
         Usuario adminOtra = crearUsuario(otra, "admin-otra@x.com", RolUsuario.ADMIN);
 
         assertThrows(PermisoDenegadoException.class,
@@ -166,6 +166,6 @@ class PermisoPoolReglasTest {
     private Usuario crearUsuario(Empresa deLaEmpresa, String email, RolUsuario rol) {
         return usuarioRepository.save(Usuario.builder()
                 .empresa(deLaEmpresa).nombre("Usuario " + rol).email(email)
-                .rolUsuario(rol).rol(rol.name()).passwordHash("x").build());
+                .rolUsuario(rol).passwordHash("x").build());
     }
 }

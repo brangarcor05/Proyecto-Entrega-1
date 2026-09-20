@@ -10,15 +10,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmpresaRequest {
+public class CrearEmpresaRequest {
 
     @NotBlank(message = "El nombre de la empresa es obligatorio")
     @Size(max = 100)
     private String nombre;
 
-    @NotBlank(message = "El RUC es obligatorio")
+    @NotBlank(message = "El RUT es obligatorio")
     @Size(max = 20)
-    private String rut;
+    private String rut; // TODO equipo: en la HU-01 esto se llama "NIT" (es una empresa colombiana);
+                         // decidan un solo nombre para entidad + DTOs + repositorio y unifiquenlo
 
     @NotBlank(message = "La razón social es obligatoria")
     @Size(max = 200)
