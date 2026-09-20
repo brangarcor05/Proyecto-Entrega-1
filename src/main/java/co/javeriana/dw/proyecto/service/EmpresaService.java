@@ -27,8 +27,8 @@ public class EmpresaService {
 
     @Transactional
     public EmpresaResponse crear(CrearEmpresaRequest request) {
-        if (empresaRepository.existsByRuc(request.getRuc())) {
-            throw new NombreDuplicadoException("Ya existe una empresa registrada con el RUC " + request.getRuc());
+        if (empresaRepository.existsByRut(request.getRut())) {
+            throw new NombreDuplicadoException("Ya existe una empresa registrada con el RUT " + request.getRut());
         }
         if (empresaRepository.existsByEmail(request.getEmail())) {
             throw new NombreDuplicadoException("Ya existe una empresa registrada con el correo " + request.getEmail());
