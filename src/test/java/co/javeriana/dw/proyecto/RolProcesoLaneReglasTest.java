@@ -25,7 +25,9 @@ import co.javeriana.dw.proyecto.dto.rolproceso.ActualizarRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.CrearRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.RolProcesoResponse;
 import co.javeriana.dw.proyecto.entidad.Actividad;
+import co.javeriana.dw.proyecto.entidad.AccionHistorial;
 import co.javeriana.dw.proyecto.entidad.Empresa;
+import co.javeriana.dw.proyecto.entidad.Historial;
 import co.javeriana.dw.proyecto.entidad.Lane;
 import co.javeriana.dw.proyecto.entidad.Pool;
 import co.javeriana.dw.proyecto.entidad.Proceso;
@@ -37,6 +39,7 @@ import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.exception.ReglaNegocioException;
 import co.javeriana.dw.proyecto.repository.ActividadRepository;
 import co.javeriana.dw.proyecto.repository.EmpresaRepository;
+import co.javeriana.dw.proyecto.repository.HistorialRepository;
 import co.javeriana.dw.proyecto.repository.LaneRepository;
 import co.javeriana.dw.proyecto.repository.PoolRepository;
 import co.javeriana.dw.proyecto.repository.ProcesoRepository;
@@ -71,6 +74,8 @@ class RolProcesoLaneReglasTest {
     private LaneRepository laneRepository;
     @Autowired
     private ActividadRepository actividadRepository;
+    @Autowired
+    private HistorialRepository historialRepository;
 
     private Empresa empresa;
     private Usuario admin;
@@ -301,6 +306,51 @@ class RolProcesoLaneReglasTest {
         laneService.eliminar(lane.id(), admin.getId());
 
         assertTrue(laneService.listarPorPool(poolPropio.getId()).isEmpty());
+    }
+
+    @Test
+    @DisplayName("HU-18: cada cambio sobre un rol de proceso queda registrado en el historial")
+    void editarUnRolQuedaRegistradoEnElHistorial() {
+        RolProcesoResponse rol = crearRol("Analista", "Version inicial");
+
+        rolProcesoService.actualizar(rol.id(),
+                new ActualizarRolProcesoRequest("Analista Senior", "Version revisada"), admin.getId());
+
+        List<Historial> historial = historialRepository
+                .findByEntidadTipoAndEntidadIdOrderByFechaDesc("RolProceso", rol.id());
+        assertEquals(2, historial.size(), "Deberian quedar dos entradas: creacion y edicion");
+        assertEquals(AccionHistorial.EDICION, historial.get(0).getAccion(),
+                "La mas reciente (indice 0) debe ser la edicion");
+        assertEquals(AccionHistorial.CREACION, historial.get(1).getAccion());
+    }
+
+    @Test
+    @DisplayName("HU-19: eliminar un rol de proceso tambien queda registrado en el historial")
+    void eliminarUnRolQuedaRegistradoEnElHistorial() {
+        RolProcesoResponse rol = crearRol("Auditor", null);
+
+        rolProcesoService.eliminar(rol.id(), admin.getId());
+
+        List<Historial> historial = historialRepository
+                .findByEntidadTipoAndEntidadIdOrderByFechaDesc("RolProceso", rol.id());
+        assertEquals(AccionHistorial.ELIMINACION, historial.get(0).getAccion());
+    }
+
+    @Test
+    @DisplayName("HU-22: crear, renombrar y eliminar una lane queda registrado en el historial")
+    void losCambiosDeUnaLaneQuedanEnElHistorial() {
+        LaneResponse lane = crearLane(poolPropio.getId(), crearRol("Analista", null).id());
+        RolProcesoResponse supervisor = crearRol("Supervisor", null);
+
+        laneService.actualizar(lane.id(), new ActualizarLaneRequest(supervisor.id()), admin.getId());
+        laneService.eliminar(lane.id(), admin.getId());
+
+        List<Historial> historial = historialRepository
+                .findByEntidadTipoAndEntidadIdOrderByFechaDesc("Lane", lane.id());
+        assertEquals(3, historial.size(), "Deberian quedar tres entradas: creacion, edicion y eliminacion");
+        assertEquals(AccionHistorial.ELIMINACION, historial.get(0).getAccion());
+        assertEquals(AccionHistorial.EDICION, historial.get(1).getAccion());
+        assertEquals(AccionHistorial.CREACION, historial.get(2).getAccion());
     }
 
     /* ------------------------------------------------------------------
