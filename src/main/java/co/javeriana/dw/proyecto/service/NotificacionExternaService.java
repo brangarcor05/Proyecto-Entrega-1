@@ -2,6 +2,8 @@ package co.javeriana.dw.proyecto.service;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +13,7 @@ import co.javeriana.dw.proyecto.dto.notificacionexterna.CrearNotificacionExterna
 import co.javeriana.dw.proyecto.dto.notificacionexterna.NotificacionExternaResponse;
 import co.javeriana.dw.proyecto.entidad.AccionFalloNotificacion;
 import co.javeriana.dw.proyecto.entidad.AccionHistorial;
+import co.javeriana.dw.proyecto.entidad.CampoDato;
 import co.javeriana.dw.proyecto.entidad.Actividad;
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
 import co.javeriana.dw.proyecto.entidad.EventoNotificacionExterna;
@@ -30,6 +33,7 @@ import co.javeriana.dw.proyecto.repository.ProcesoRepository;
  * el envio y su punto en el flujo: el sistema no se conecta a ningun servicio real.
  */
 @Service
+@DependsOn("eventoNotificacionMapperConfig")
 public class NotificacionExternaService {
 
     private final EventoNotificacionExternaRepository notificacionRepository;
@@ -38,17 +42,19 @@ public class NotificacionExternaService {
     private final ActividadRepository actividadRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public NotificacionExternaService(EventoNotificacionExternaRepository notificacionRepository,
                                       ProcesoRepository procesoRepository, PoolRepository poolRepository,
                                       ActividadRepository actividadRepository,
-                                      PermisoService permisoService, HistorialService historialService) {
+                                      PermisoService permisoService, HistorialService historialService, ModelMapper modelMapper) {
         this.notificacionRepository = notificacionRepository;
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
         this.actividadRepository = actividadRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -68,7 +74,7 @@ public class NotificacionExternaService {
 
         historialService.registrar("NotificacionExterna", notificacion.getId(), AccionHistorial.CREACION,
                 usuario, proceso, "Notificacion externa creada: " + notificacion.getNombre());
-        return NotificacionExternaResponse.desde(notificacion);
+        return modelMapper.map(notificacion, NotificacionExternaResponse.class);
     }
 
     @Transactional
@@ -87,19 +93,19 @@ public class NotificacionExternaService {
 
         historialService.registrar("NotificacionExterna", notificacion.getId(), AccionHistorial.EDICION,
                 usuario, proceso, "Notificacion externa actualizada: " + notificacion.getNombre());
-        return NotificacionExternaResponse.desde(notificacion);
+        return modelMapper.map(notificacion, NotificacionExternaResponse.class);
     }
 
     @Transactional(readOnly = true)
     public NotificacionExternaResponse obtener(Long notificacionId) {
-        return NotificacionExternaResponse.desde(obtenerActiva(notificacionId));
+        return modelMapper.map(obtenerActiva(notificacionId), NotificacionExternaResponse.class);
     }
 
     @Transactional(readOnly = true)
     public List<NotificacionExternaResponse> listarPorProceso(Long procesoId) {
         obtenerProcesoActivo(procesoId);
         return notificacionRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
-                .map(NotificacionExternaResponse::desde)
+                .map(notificacion -> modelMapper.map(notificacion, NotificacionExternaResponse.class))
                 .toList();
     }
 
@@ -136,7 +142,7 @@ public class NotificacionExternaService {
 
         notificacion.getCampos().clear();
         if (campos != null) {
-            campos.stream().map(CampoDatoDto::aEntidad).forEach(notificacion.getCampos()::add);
+            campos.stream().map(campo -> modelMapper.map(campo, CampoDato.class)).forEach(notificacion.getCampos()::add);
         }
     }
 

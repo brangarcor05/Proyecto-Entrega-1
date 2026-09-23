@@ -2,6 +2,8 @@ package co.javeriana.dw.proyecto.service;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ import co.javeriana.dw.proyecto.repository.ProcesoRepository;
  * modela, no los ejecuta.
  */
 @Service
+@DependsOn("eventoNotificacionMapperConfig")
 public class EventoService {
 
     private final EventoRepository eventoRepository;
@@ -33,15 +36,17 @@ public class EventoService {
     private final PoolRepository poolRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public EventoService(EventoRepository eventoRepository, ProcesoRepository procesoRepository,
                          PoolRepository poolRepository, PermisoService permisoService,
-                         HistorialService historialService) {
+                         HistorialService historialService, ModelMapper modelMapper) {
         this.eventoRepository = eventoRepository;
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -63,7 +68,7 @@ public class EventoService {
 
         historialService.registrar("Evento", evento.getId(), AccionHistorial.CREACION,
                 usuario, proceso, "Evento creado: " + evento.getNombre());
-        return EventoResponse.desde(evento);
+        return modelMapper.map(evento, EventoResponse.class);
     }
 
     @Transactional
@@ -80,12 +85,12 @@ public class EventoService {
 
         historialService.registrar("Evento", evento.getId(), AccionHistorial.EDICION,
                 usuario, evento.getProceso(), "Evento actualizado: " + evento.getNombre());
-        return EventoResponse.desde(evento);
+        return modelMapper.map(evento, EventoResponse.class);
     }
 
     @Transactional(readOnly = true)
     public EventoResponse obtener(Long eventoId) {
-        return EventoResponse.desde(obtenerActivo(eventoId));
+        return modelMapper.map(obtenerActivo(eventoId), EventoResponse.class);
     }
 
     @Transactional(readOnly = true)
@@ -93,7 +98,7 @@ public class EventoService {
         obtenerProcesoActivo(procesoId);
         return eventoRepository.findByProcesoId(procesoId).stream()
                 .filter(Evento::isActivo)
-                .map(EventoResponse::desde)
+                .map(evento -> modelMapper.map(evento, EventoResponse.class))
                 .toList();
     }
 
