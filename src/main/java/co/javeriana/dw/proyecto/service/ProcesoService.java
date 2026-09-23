@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,15 +41,18 @@ public class ProcesoService {
     private final EmpresaRepository empresaRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public ProcesoService(ProcesoRepository procesoRepository, PoolRepository poolRepository,
                           EmpresaRepository empresaRepository, PermisoService permisoService,
-                          HistorialService historialService) {
+                          HistorialService historialService,
+                          ModelMapper modelMapper) {
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
         this.empresaRepository = empresaRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -83,7 +87,7 @@ public class ProcesoService {
 
         historialService.registrar("Proceso", proceso.getId(), AccionHistorial.CREACION,
                 usuarioCreador, proceso, "Proceso creado");
-        return ProcesoResponse.desde(proceso, empresa.getId());
+        return modelMapper.map(proceso, ProcesoResponse.class);
     }
 
     @Transactional
@@ -107,7 +111,7 @@ public class ProcesoService {
 
         historialService.registrar("Proceso", proceso.getId(), AccionHistorial.EDICION,
                 usuarioEditor, proceso, "Datos del proceso actualizados");
-        return ProcesoResponse.desde(proceso, usuarioEditor.getEmpresa().getId());
+        return modelMapper.map(proceso, ProcesoResponse.class);
     }
 
     /**
@@ -139,7 +143,7 @@ public class ProcesoService {
         historialService.registrar("Proceso", proceso.getId(), AccionHistorial.EDICION,
                 administrador, proceso, detalle);
 
-        return ProcesoResponse.desde(proceso, administrador.getEmpresa().getId());
+        return modelMapper.map(proceso, ProcesoResponse.class);
     }
 
     /**
@@ -153,7 +157,8 @@ public class ProcesoService {
         if (!puedeConsultar(proceso, empresaId)) {
             throw new RecursoNoEncontradoException("Proceso no encontrado: " + procesoId);
         }
-        return ProcesoResponse.desde(proceso, empresaId);
+        return modelMapper.map(proceso, ProcesoResponse.class)
+                .conSoloLectura(!proceso.getEmpresa().getId().equals(empresaId));
     }
 
     /**
@@ -211,7 +216,8 @@ public class ProcesoService {
         };
 
         return procesoRepository.findAll(filtro, pageable)
-                .map(proceso -> ProcesoResponse.desde(proceso, empresaId));
+                .map(proceso -> modelMapper.map(proceso, ProcesoResponse.class)
+                        .conSoloLectura(!proceso.getEmpresa().getId().equals(empresaId)));
     }
 
     /** Eliminacion logica de HU-06: el proceso se conserva y deja de listarse. */

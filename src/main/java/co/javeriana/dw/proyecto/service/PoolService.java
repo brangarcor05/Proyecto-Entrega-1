@@ -2,6 +2,7 @@ package co.javeriana.dw.proyecto.service;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +36,19 @@ public class PoolService {
     private final NodoProcesoRepository nodoProcesoRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public PoolService(PoolRepository poolRepository, ProcesoRepository procesoRepository,
                        LaneRepository laneRepository, NodoProcesoRepository nodoProcesoRepository,
-                       PermisoService permisoService, HistorialService historialService) {
+                       PermisoService permisoService, HistorialService historialService,
+                          ModelMapper modelMapper) {
         this.poolRepository = poolRepository;
         this.procesoRepository = procesoRepository;
         this.laneRepository = laneRepository;
         this.nodoProcesoRepository = nodoProcesoRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     /**
@@ -68,7 +72,7 @@ public class PoolService {
 
         historialService.registrar("Pool", pool.getId(), AccionHistorial.CREACION,
                 usuario, proceso, "Pool creado: " + pool.getNombre());
-        return PoolResponse.desde(pool);
+        return modelMapper.map(pool, PoolResponse.class);
     }
 
     @Transactional
@@ -94,19 +98,19 @@ public class PoolService {
 
         historialService.registrar("Pool", pool.getId(), AccionHistorial.EDICION,
                 usuario, pool.getProceso(), "Pool actualizado: " + pool.getNombre());
-        return PoolResponse.desde(pool);
+        return modelMapper.map(pool, PoolResponse.class);
     }
 
     @Transactional(readOnly = true)
     public PoolResponse obtener(Long poolId) {
-        return PoolResponse.desde(obtenerActivo(poolId));
+        return modelMapper.map(obtenerActivo(poolId), PoolResponse.class);
     }
 
     @Transactional(readOnly = true)
     public List<PoolResponse> listarPorProceso(Long procesoId) {
         obtenerProcesoActivo(procesoId);
         return poolRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
-                .map(PoolResponse::desde)
+                .map(pool -> modelMapper.map(pool, PoolResponse.class))
                 .toList();
     }
 
