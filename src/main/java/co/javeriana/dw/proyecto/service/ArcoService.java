@@ -3,6 +3,7 @@ package co.javeriana.dw.proyecto.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +38,18 @@ public class ArcoService {
     private final ProcesoRepository procesoRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public ArcoService(ArcoRepository arcoRepository, NodoProcesoRepository nodoProcesoRepository,
                        ProcesoRepository procesoRepository, PermisoService permisoService,
-                       HistorialService historialService) {
+                       HistorialService historialService,
+                          ModelMapper modelMapper) {
         this.arcoRepository = arcoRepository;
         this.nodoProcesoRepository = nodoProcesoRepository;
         this.procesoRepository = procesoRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -78,7 +82,7 @@ public class ArcoService {
 
         historialService.registrar("Arco", arco.getId(), AccionHistorial.CREACION, usuario, proceso,
                 "Arco creado: " + origen.getNombre() + " -> " + destino.getNombre());
-        return ArcoResponse.desde(arco);
+        return modelMapper.map(arco, ArcoResponse.class);
     }
 
     /** HU-12: se puede reconectar el arco, y se le aplican las validaciones de la creacion. */
@@ -110,19 +114,19 @@ public class ArcoService {
 
         historialService.registrar("Arco", arco.getId(), AccionHistorial.EDICION, usuario, proceso,
                 "Arco actualizado: " + origen.getNombre() + " -> " + destino.getNombre());
-        return ArcoResponse.desde(arco);
+        return modelMapper.map(arco, ArcoResponse.class);
     }
 
     @Transactional(readOnly = true)
     public ArcoResponse obtener(Long arcoId) {
-        return ArcoResponse.desde(obtenerActivo(arcoId));
+        return modelMapper.map(obtenerActivo(arcoId), ArcoResponse.class);
     }
 
     @Transactional(readOnly = true)
     public List<ArcoResponse> listarPorProceso(Long procesoId) {
         obtenerProcesoActivo(procesoId);
         return arcoRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
-                .map(ArcoResponse::desde)
+                .map(arco -> modelMapper.map(arco, ArcoResponse.class))
                 .toList();
     }
 

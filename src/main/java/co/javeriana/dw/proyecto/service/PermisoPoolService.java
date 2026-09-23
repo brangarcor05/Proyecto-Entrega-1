@@ -3,6 +3,7 @@ package co.javeriana.dw.proyecto.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +27,15 @@ public class PermisoPoolService {
     private final PermisoPoolRepository permisoPoolRepository;
     private final EmpresaRepository empresaRepository;
     private final PermisoService permisoService;
+    private final ModelMapper modelMapper;
 
     public PermisoPoolService(PermisoPoolRepository permisoPoolRepository,
-                              EmpresaRepository empresaRepository, PermisoService permisoService) {
+                              EmpresaRepository empresaRepository, PermisoService permisoService,
+                          ModelMapper modelMapper) {
         this.permisoPoolRepository = permisoPoolRepository;
         this.empresaRepository = empresaRepository;
         this.permisoService = permisoService;
+        this.modelMapper = modelMapper;
     }
 
     /**
@@ -48,7 +52,7 @@ public class PermisoPoolService {
         List<PermisoPoolResponse> permisos = new ArrayList<>();
         for (RolUsuario rol : RolUsuario.values()) {
             permisos.add(permisoPoolRepository.findByEmpresaIdAndRolUsuario(empresaId, rol)
-                    .map(PermisoPoolResponse::desde)
+                    .map(permiso -> modelMapper.map(permiso, PermisoPoolResponse.class))
                     .orElseGet(() -> PermisoPoolResponse.porDefecto(empresaId, rol)));
         }
         return permisos;
@@ -77,6 +81,6 @@ public class PermisoPoolService {
         permiso.setPuedeEditar(request.puedeEditar());
         permiso.setPuedeEliminar(request.puedeEliminar());
 
-        return PermisoPoolResponse.desde(permisoPoolRepository.save(permiso));
+        return modelMapper.map(permisoPoolRepository.save(permiso), PermisoPoolResponse.class);
     }
 }

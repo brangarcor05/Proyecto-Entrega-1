@@ -22,6 +22,17 @@ public record ProcesoResponse(
         boolean soloLectura) {
 
     /**
+     * Devuelve una copia marcada como solo lectura o no.
+     *
+     * ModelMapper solo conoce la entidad de origen, no quien esta consultando, asi que
+     * el servicio ajusta este dato despues de mapear.
+     */
+    public ProcesoResponse conSoloLectura(boolean soloLectura) {
+        return new ProcesoResponse(id, empresaId, empresaNombre, nombre, descripcion,
+                categoria, estado, activo, compartido, soloLectura);
+    }
+
+    /**
      * Debe invocarse dentro de una transaccion: la empresa se carga de forma perezosa.
      *
      * @param empresaIdConsultante empresa que hace la peticion, para saber si el proceso
