@@ -1,9 +1,13 @@
 package co.javeriana.dw.proyecto.entidad;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "gateway")
@@ -12,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Gateway extends NodoProceso {
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String tipo; // exclusivo / paralelo / inclusivo — se define en HU-14
+    private TipoGateway tipo;
 }

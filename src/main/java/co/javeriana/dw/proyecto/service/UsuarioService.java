@@ -1,62 +1,101 @@
 package co.javeriana.dw.proyecto.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
+import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
+import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
+import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
+import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
+import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
 import co.javeriana.dw.proyecto.entidad.Empresa;
+import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.entidad.Usuario;
+import co.javeriana.dw.proyecto.exception.CredencialesInvalidasException;
+import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
+import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.repository.UsuarioRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+                           ModelMapper modelMapper) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
-    public Usuario guardar(Usuario usuario) {
-        Optional<Usuario> usuarioExistente = usuarioRepository
-                .findByEmpresaAndEmail(usuario.getEmpresa(), usuario.getEmail());
-        if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(usuario.getId())) {
-            throw new IllegalArgumentException("Ya existe un usuario con ese email en la empresa.");
+    @Transactional
+    public Usuario crearAdministradorInicial(Empresa empresa, String nombre, String correo, String passwordPlano) {
+        if (usuarioRepository.existsByEmail(correo)) {
+            throw new NombreDuplicadoException("Ya existe un usuario con el correo " + correo);
         }
-        return usuarioRepository.save(usuario);
+        Usuario admin = Usuario.builder()
+                .empresa(empresa)
+                .nombre(nombre)
+                .email(correo)
+                .passwordHash(passwordEncoder.encode(passwordPlano))
+                .rolUsuario(RolUsuario.ADMIN)
+                .activo(true)
+                .build();
+        return usuarioRepository.save(admin);
     }
 
-    public List<Usuario> listarTodos() {
-        return usuarioRepository.findAllByOrderByIdAsc();
-    }
-
-    public Optional<Usuario> buscarPorId(Long id) {
-        return usuarioRepository.findById(id);
-    }
-
-    public List<Usuario> listarPorEmpresa(Empresa empresa) {
-        return usuarioRepository.findByEmpresaAndActivo(empresa, true);
-    }
-
-    public Optional<Usuario> buscarPorEmpresaYEmail(Empresa empresa, String email) {
-        return usuarioRepository.findByEmpresaAndEmail(empresa, email);
-    }
-
-    public Usuario actualizar(Usuario usuario) {
-        if (usuario.getId() == null) {
-            throw new IllegalArgumentException("El usuario debe tener un ID para ser actualizado.");
+    @Transactional
+    public UsuarioResponse invitarUsuario(Empresa empresa, CrearUsuarioRequest request) {
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
+            throw new NombreDuplicadoException("El correo " + request.getEmail() + " ya está registrado");
         }
-        if (!usuarioRepository.existsById(usuario.getId())) {
-            throw new IllegalArgumentException("El usuario no existe.");
-        }
-        return guardar(usuario);
+
+        
+        Usuario usuario = modelMapper.map(request, Usuario.class);
+        usuario.setEmpresa(empresa);
+        usuario.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        usuario.setActivo(true);
+
+        return modelMapper.map(usuarioRepository.save(usuario), UsuarioResponse.class);
     }
 
-    public void eliminar(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe."));
+    @Transactional
+    public UsuarioResponse cambiarRolAcceso(Long usuarioId, CambiarRolRequest request) {
+        Usuario usuario = obtenerPorId(usuarioId);
+        modelMapper.map(request, usuario); 
+        return modelMapper.map(usuarioRepository.save(usuario), UsuarioResponse.class);
+    }
+
+    @Transactional
+    public void desactivar(Long usuarioId) {
+        Usuario usuario = obtenerPorId(usuarioId);
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
+    }
+
+    public SesionResponse autenticar(LoginRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+                .orElseThrow(CredencialesInvalidasException::new);
+        if (!usuario.isActivo() || !passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
+            throw new CredencialesInvalidasException();
+        }
+        return modelMapper.map(usuario, SesionResponse.class);
+    }
+
+    public List<UsuarioResponse> listarPorEmpresa(Long empresaId) {
+        return usuarioRepository.findByEmpresaId(empresaId).stream()
+                .map(u -> modelMapper.map(u, UsuarioResponse.class))
+                .toList();
+    }
+
+    private Usuario obtenerPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + id));
     }
 }
