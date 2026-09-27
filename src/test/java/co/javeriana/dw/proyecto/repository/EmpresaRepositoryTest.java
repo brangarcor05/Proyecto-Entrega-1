@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Pruebas de HU-01 contra una base de datos real (H2 en memoria, ver
- * application-test.properties) — verifican las constraints unique de RUC y
+ * application-test.properties) — verifican las constraints unique de RUT y
  * email que no se pueden probar con un mock de repository.
  */
 @DataJpaTest
@@ -22,25 +22,25 @@ class EmpresaRepositoryTest {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    private Empresa empresaDePrueba(String ruc, String email) {
+    private Empresa empresaDePrueba(String rut, String email) {
         Empresa e = new Empresa();
         e.setNombre("Acme S.A.S.");
-        e.setRuc(ruc);
+        e.setRut(rut);
         e.setRazonSocial("Acme Sociedad Anonima");
         e.setEmail(email);
         return e;
     }
 
     @Test
-    void guardarYBuscarPorRuc_funcionaCorrectamente() {
+    void guardarYBuscarPorRut_funcionaCorrectamente() {
         empresaRepository.save(empresaDePrueba("900123456-7", "a@acme.com"));
 
-        assertThat(empresaRepository.existsByRuc("900123456-7")).isTrue();
-        assertThat(empresaRepository.findByRuc("900123456-7")).isPresent();
+        assertThat(empresaRepository.existsByRut("900123456-7")).isTrue();
+        assertThat(empresaRepository.findByRut("900123456-7")).isPresent();
     }
 
     @Test
-    void guardarConRucDuplicado_lanzaExcepcion() {
+    void guardarConRutDuplicado_lanzaExcepcion() {
         empresaRepository.saveAndFlush(empresaDePrueba("900123456-7", "a@acme.com"));
 
         assertThatThrownBy(() ->

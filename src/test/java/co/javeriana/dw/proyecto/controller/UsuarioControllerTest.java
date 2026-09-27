@@ -12,12 +12,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.List;
-
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -30,15 +39,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(UsuarioController.class)
 @Import(ManejadorGlobalExcepciones.class)
+@WithMockUser(roles = "ADMIN") 
 class UsuarioControllerTest {
 
     @Autowired
+    private WebApplicationContext context;
+
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @BeforeEach
+    void setup() {
+            mockMvc = MockMvcBuilders
+            .webAppContextSetup(context)
+            .apply(springSecurity())   
+            .build();
+}
+
+   @MockBean
     private UsuarioService usuarioService;
 
     private CrearUsuarioRequest requestValido() {
@@ -58,6 +78,7 @@ class UsuarioControllerTest {
         when(usuarioService.invitarUsuario(any(), any())).thenReturn(response);
 
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .param("empresaId", "1")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
@@ -69,6 +90,7 @@ class UsuarioControllerTest {
     @Test
     void invitar_devuelve400_cuandoFaltaEmpresaId() throws Exception {
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
                 .andExpect(status().isBadRequest());
@@ -80,6 +102,7 @@ class UsuarioControllerTest {
         request.setEmail("no-es-correo");
 
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .param("empresaId", "1")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
@@ -92,6 +115,7 @@ class UsuarioControllerTest {
         request.setRolUsuario(null);
 
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .param("empresaId", "1")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
@@ -104,6 +128,7 @@ class UsuarioControllerTest {
                 .thenThrow(new NombreDuplicadoException("El correo ya esta registrado"));
 
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .param("empresaId", "1")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
@@ -121,6 +146,7 @@ class UsuarioControllerTest {
         request.setRolUsuario(RolUsuario.ADMIN);
 
         mockMvc.perform(patch("/api/usuarios/5/rol")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -136,6 +162,7 @@ class UsuarioControllerTest {
         request.setRolUsuario(RolUsuario.ADMIN);
 
         mockMvc.perform(patch("/api/usuarios/99/rol")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -146,6 +173,7 @@ class UsuarioControllerTest {
         CambiarRolRequest request = new CambiarRolRequest();
 
         mockMvc.perform(patch("/api/usuarios/5/rol")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -153,10 +181,10 @@ class UsuarioControllerTest {
 
     @Test
     void desactivar_devuelve204() throws Exception {
-        mockMvc.perform(delete("/api/usuarios/7"))
+        mockMvc.perform(delete("/api/usuarios/7")
+                        .with(csrf()))   
                 .andExpect(status().isNoContent());
     }
-
     @Test
     void listarPorEmpresa_devuelve200ConLista() throws Exception {
         UsuarioResponse u1 = new UsuarioResponse();

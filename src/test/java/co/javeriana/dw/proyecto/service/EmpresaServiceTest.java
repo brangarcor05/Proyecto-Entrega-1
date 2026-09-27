@@ -48,7 +48,7 @@ class EmpresaServiceTest {
     private CrearEmpresaRequest requestDePrueba() {
         CrearEmpresaRequest request = new CrearEmpresaRequest();
         request.setNombre("Acme S.A.S.");
-        request.setRuc("900123456-7");
+        request.setRut("900123456-7");
         request.setRazonSocial("Acme Sociedad Anonima");
         request.setEmail("contacto@acme.com");
         request.setTelefono("3001234567");
@@ -62,7 +62,7 @@ class EmpresaServiceTest {
     @Test
     void crear_creaEmpresaYAdministrador_enUnaSolaLlamada() {
         CrearEmpresaRequest request = requestDePrueba();
-        when(empresaRepository.existsByRuc(request.getRuc())).thenReturn(false);
+        when(empresaRepository.existsByRut(request.getRut())).thenReturn(false);
         when(empresaRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(empresaRepository.save(any(Empresa.class))).thenAnswer(inv -> {
             Empresa e = inv.getArgument(0);
@@ -83,9 +83,9 @@ class EmpresaServiceTest {
     }
 
     @Test
-    void crear_lanzaExcepcion_cuandoRucYaExiste() {
+    void crear_lanzaExcepcion_cuandoRutYaExiste() {
         CrearEmpresaRequest request = requestDePrueba();
-        when(empresaRepository.existsByRuc(request.getRuc())).thenReturn(true);
+        when(empresaRepository.existsByRut(request.getRut())).thenReturn(true);
 
         assertThatThrownBy(() -> empresaService.crear(request))
                 .isInstanceOf(NombreDuplicadoException.class);
@@ -96,7 +96,7 @@ class EmpresaServiceTest {
     @Test
     void crear_lanzaExcepcion_cuandoEmailYaExiste() {
         CrearEmpresaRequest request = requestDePrueba();
-        when(empresaRepository.existsByRuc(request.getRuc())).thenReturn(false);
+        when(empresaRepository.existsByRut(request.getRut())).thenReturn(false);
         when(empresaRepository.existsByEmail(request.getEmail())).thenReturn(true);
 
         assertThatThrownBy(() -> empresaService.crear(request))

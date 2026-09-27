@@ -29,10 +29,10 @@ class UsuarioRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private Empresa nuevaEmpresa(String nombre, String ruc, String email) {
+    private Empresa nuevaEmpresa(String nombre, String rut, String email) {
         Empresa e = new Empresa();
         e.setNombre(nombre);
-        e.setRuc(ruc);
+        e.setRut(rut);
         e.setRazonSocial(nombre);
         e.setEmail(email);
         return e;

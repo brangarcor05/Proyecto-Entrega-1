@@ -1,5 +1,6 @@
 package co.javeriana.dw.proyecto.controller;
 
+import co.javeriana.dw.proyecto.config.SeguridadConfig;
 import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
 import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,13 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Pruebas de HU-03 a nivel HTTP: login exitoso, validacion de entrada, y el
- * mensaje generico cuando las credenciales son invalidas (sin revelar si el
- * correo existe, tal como pide la HU).
- */
 @WebMvcTest(AutenticacionController.class)
-@Import(ManejadorGlobalExcepciones.class)
+@Import({ManejadorGlobalExcepciones.class, SeguridadConfig.class})   // 👈 añadido
 class AutenticacionControllerTest {
 
     @Autowired
@@ -35,7 +31,7 @@ class AutenticacionControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockBean
     private UsuarioService usuarioService;
 
     private LoginRequest requestValido() {

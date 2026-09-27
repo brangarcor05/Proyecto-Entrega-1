@@ -10,10 +10,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.test.context.support.WithMockUser;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,21 +33,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(EmpresaController.class)
 @Import(ManejadorGlobalExcepciones.class)
+@WithMockUser(roles = "ADMIN") 
 class EmpresaControllerTest {
 
     @Autowired
+    private WebApplicationContext context;
+
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
+    @BeforeEach
+    void setup() {
+            mockMvc = MockMvcBuilders
+            .webAppContextSetup(context)
+            .apply(springSecurity())   
+            .build();
+                    }
 
-    @MockitoBean
+    @MockBean
     private EmpresaService empresaService;
 
     private CrearEmpresaRequest requestValido() {
         CrearEmpresaRequest request = new CrearEmpresaRequest();
         request.setNombre("Acme S.A.S.");
-        request.setRuc("900123456-7");
+        request.setRut("900123456-7");
         request.setRazonSocial("Acme Sociedad Anonima");
         request.setEmail("contacto@acme.com");
         request.setAdminNombre("Juan Perez");
@@ -58,6 +74,7 @@ class EmpresaControllerTest {
         when(empresaService.crear(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
                 .andExpect(status().isCreated())
@@ -71,6 +88,7 @@ class EmpresaControllerTest {
         request.setNombre("");
 
         mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -82,6 +100,7 @@ class EmpresaControllerTest {
         request.setEmail("no-es-un-correo");
 
         mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -93,17 +112,19 @@ class EmpresaControllerTest {
         request.setAdminPassword("123");
 
         mockMvc.perform(post("/api/empresas")
-                        .contentType("application/json")
+                        .with(csrf())
+                        .contentType(   "application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void crear_devuelve409_cuandoRucDuplicado() throws Exception {
+    void crear_devuelve409_cuandoRutDuplicado() throws Exception {
         when(empresaService.crear(any()))
-                .thenThrow(new NombreDuplicadoException("Ya existe una empresa con ese RUC"));
+                .thenThrow(new NombreDuplicadoException("Ya existe una empresa con ese RUT"));
 
         mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
                 .andExpect(status().isConflict());
@@ -116,7 +137,8 @@ class EmpresaControllerTest {
         response.setNombre("Acme S.A.S.");
         when(empresaService.obtenerPorId(1L)).thenReturn(response);
 
-        mockMvc.perform(get("/api/empresas/1"))
+        mockMvc.perform(get("/api/empresas/1")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Acme S.A.S."));
     }
@@ -126,7 +148,8 @@ class EmpresaControllerTest {
         when(empresaService.obtenerPorId(404L))
                 .thenThrow(new RecursoNoEncontradoException("no existe"));
 
-        mockMvc.perform(get("/api/empresas/404"))
+        mockMvc.perform(get("/api/empresas/404")
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 }
