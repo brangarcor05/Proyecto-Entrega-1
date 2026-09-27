@@ -18,7 +18,7 @@ public class CrearEmpresaRequest {
 
     @NotBlank(message = "El RUT es obligatorio")
     @Size(max = 20)
-    private String rut; // TODO equipo: en la HU-01 esto se llama "NIT" (es una empresa colombiana);
+    private String rut; // Equipo en la HU 01 esto se llama NIT es una empresa colombiana
                          // decidan un solo nombre para entidad + DTOs + repositorio y unifiquenlo
 
     @NotBlank(message = "La razón social es obligatoria")
