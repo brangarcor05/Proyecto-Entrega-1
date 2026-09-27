@@ -83,14 +83,13 @@ class UsuarioRepositoryTest {
 
     @Test
     void guardarConEmailDuplicado_enDistintasEmpresas_lanzaExcepcion() {
-        // Confirma en base de datos real la decision tomada: el email es unique
-        // a nivel de tabla completa (uk_usuario_email), sin importar la empresa.
         Empresa empresaA = entityManager.persist(nuevaEmpresa("A S.A.S.", "555", "e@e.com"));
         Empresa empresaB = entityManager.persist(nuevaEmpresa("B S.A.S.", "666", "f@f.com"));
         usuarioRepository.saveAndFlush(nuevoUsuario(empresaA, "mismo@correo.com"));
 
-        assertThatThrownBy(() ->
-                usuarioRepository.saveAndFlush(nuevoUsuario(empresaB, "mismo@correo.com")))
+        Usuario duplicado = nuevoUsuario(empresaB, "mismo@correo.com");
+
+        assertThatThrownBy(() -> usuarioRepository.saveAndFlush(duplicado))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 }

@@ -81,8 +81,10 @@ class UsuarioServiceTest {
     void crearAdministradorInicial_lanzaExcepcion_cuandoCorreoYaExiste() {
         when(usuarioRepository.existsByEmail("admin@acme.com")).thenReturn(true);
 
+        Empresa empresa = empresaDePrueba();  // se construye fuera del lambda
+
         assertThatThrownBy(() -> usuarioService.crearAdministradorInicial(
-                empresaDePrueba(), "Juan Perez", "admin@acme.com", "claveSegura123"))
+                empresa, "Juan Perez", "admin@acme.com", "claveSegura123"))
                 .isInstanceOf(NombreDuplicadoException.class);
 
         verify(usuarioRepository, never()).save(any());
@@ -113,12 +115,15 @@ class UsuarioServiceTest {
     @Test
     void invitarUsuario_lanzaExcepcion_cuandoCorreoYaExiste() {
         when(usuarioRepository.existsByEmail("ana@acme.com")).thenReturn(true);
+
+        Empresa empresa = empresaDePrueba();
+
         CrearUsuarioRequest request = new CrearUsuarioRequest();
         request.setNombre("Ana Ruiz");
         request.setEmail("ana@acme.com");
         request.setRolUsuario(RolUsuario.EDITOR);
 
-        assertThatThrownBy(() -> usuarioService.invitarUsuario(empresaDePrueba(), request))
+        assertThatThrownBy(() -> usuarioService.invitarUsuario(empresa, request))
                 .isInstanceOf(NombreDuplicadoException.class);
     }
 

@@ -20,6 +20,11 @@
 
     <properties>
         <java.version>21</java.version>
+            <!-- SonarQube -->
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.projectKey>Proyecto-Entrega-1</sonar.projectKey>
+        <sonar.projectName>Proyecto Entrega 1</sonar.projectName>
+        <sonar.token>squ_47036927f13b34e2968ec70aa630750c929fc962</sonar.token>
     </properties>
 
     <dependencies>
@@ -109,6 +114,29 @@
                     </excludes>
                 </configuration>
             </plugin>
+        <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>4.0.0.4121</version>
+        </plugin>
+            <plugin>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>0.8.12</version>
+    <executions>
+        <!-- Prepara el agente que instrumenta los tests -->
+        <execution>
+          <id>prepare-agent</id>
+          <goals><goal>prepare-agent</goal></goals>
+        </execution>
+        <!-- Genera el reporte XML en target/site/jacoco/jacoco.xml -->
+        <execution>
+          <id>report</id>
+          <phase>test</phase>
+          <goals><goal>report</goal></goals>
+        </execution>
+      </executions>
+    </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

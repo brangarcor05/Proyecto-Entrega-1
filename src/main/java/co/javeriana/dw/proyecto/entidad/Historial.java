@@ -2,20 +2,11 @@ package co.javeriana.dw.proyecto.entidad;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "historial")
@@ -29,7 +20,7 @@ public class Historial {
     private Long id;
 
     @Column(name = "entidad_tipo", nullable = false)
-    private String entidadTipo; // "Proceso", "Actividad", "Arco", etc.
+    private String entidadTipo;
 
     @Column(name = "entidad_id", nullable = false)
     private Long entidadId;
@@ -41,8 +32,9 @@ public class Historial {
     @Column(columnDefinition = "TEXT")
     private String detalle;
 
-    @Column(nullable = false)
-    private LocalDateTime fecha = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime fecha;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -50,5 +42,5 @@ public class Historial {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proceso_id")
-    private Proceso proceso; // nullable: puede haber historial a nivel de empresa/usuario
-} 
+    private Proceso proceso;
+}

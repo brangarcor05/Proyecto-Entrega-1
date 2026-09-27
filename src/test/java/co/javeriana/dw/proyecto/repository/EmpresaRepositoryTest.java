@@ -41,19 +41,21 @@ class EmpresaRepositoryTest {
 
     @Test
     void guardarConRutDuplicado_lanzaExcepcion() {
-        empresaRepository.saveAndFlush(empresaDePrueba("900123456-7", "a@acme.com"));
+    empresaRepository.saveAndFlush(empresaDePrueba("900123456-7", "a@acme.com"));
 
-        assertThatThrownBy(() ->
-                empresaRepository.saveAndFlush(empresaDePrueba("900123456-7", "b@acme.com")))
-                .isInstanceOf(DataIntegrityViolationException.class);
-    }
+    Empresa duplicada = empresaDePrueba("900123456-7", "b@acme.com");
+
+    assertThatThrownBy(() -> empresaRepository.saveAndFlush(duplicada))
+            .isInstanceOf(DataIntegrityViolationException.class);
+        }
 
     @Test
     void guardarConEmailDuplicado_lanzaExcepcion() {
         empresaRepository.saveAndFlush(empresaDePrueba("900111111-1", "duplicado@acme.com"));
 
-        assertThatThrownBy(() ->
-                empresaRepository.saveAndFlush(empresaDePrueba("900222222-2", "duplicado@acme.com")))
+        Empresa duplicada = empresaDePrueba("900222222-2", "duplicado@acme.com");
+
+        assertThatThrownBy(() -> empresaRepository.saveAndFlush(duplicada))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
