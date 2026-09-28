@@ -20,8 +20,9 @@ public class ActividadController {
     }
 
     @PostMapping
-    public ResponseEntity<ActividadResponse> crear(@Valid @RequestBody CrearActividadRequest request) {
-        ActividadResponse response = actividadService.crear(request);
+    public ResponseEntity<ActividadResponse> crear(@Valid @RequestBody CrearActividadRequest request,
+            @RequestParam Long usuarioId) {
+        ActividadResponse response = actividadService.crear(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -36,13 +37,14 @@ public class ActividadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ActividadResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarActividadRequest request) {
-        return ResponseEntity.ok(actividadService.actualizar(id, request));
+    public ResponseEntity<ActividadResponse> actualizar(@PathVariable Long id,
+            @Valid @RequestBody ActualizarActividadRequest request, @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(actividadService.actualizar(id, request, usuarioId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        actividadService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        actividadService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 public class ActividadResponse {
     private Long id;
     private Long procesoId;
+    private Long poolId;
     private Long laneId;
     private String nombre;
     private String tipo;

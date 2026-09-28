@@ -7,6 +7,7 @@ import lombok.Data;
 public class EventoMensajeRecepcionResponse {
     private Long id;
     private Long procesoId;
+    private Long poolId;
     private String nombreMensaje;
     private VarianteMensajeCatch variante;
     private String datosEsperados;
