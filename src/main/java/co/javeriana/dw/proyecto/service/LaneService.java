@@ -3,6 +3,7 @@ package co.javeriana.dw.proyecto.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +45,12 @@ public class LaneService {
     private final ActividadRepository actividadRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public LaneService(LaneRepository laneRepository, PoolRepository poolRepository,
                        RolProcesoRepository rolProcesoRepository, ProcesoRepository procesoRepository,
                        ActividadRepository actividadRepository, PermisoService permisoService,
-                       HistorialService historialService) {
+                       HistorialService historialService, ModelMapper modelMapper) {
         this.laneRepository = laneRepository;
         this.poolRepository = poolRepository;
         this.rolProcesoRepository = rolProcesoRepository;
@@ -56,6 +58,7 @@ public class LaneService {
         this.actividadRepository = actividadRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -87,7 +90,7 @@ public class LaneService {
 
         historialService.registrar("Lane", lane.getId(), AccionHistorial.CREACION,
                 usuario, proceso, "Lane creada para el rol: " + rol.getNombre());
-        return LaneResponse.desde(lane);
+        return modelMapper.map(lane, LaneResponse.class);
     }
 
     /** HU-22: "renombrar" una lane es reasignarle otro rol, porque no tiene nombre propio. */
@@ -111,7 +114,7 @@ public class LaneService {
 
         historialService.registrar("Lane", lane.getId(), AccionHistorial.EDICION,
                 usuario, proceso, "Lane reasignada al rol: " + nuevoRol.getNombre());
-        return LaneResponse.desde(lane);
+        return modelMapper.map(lane, LaneResponse.class);
     }
 
     /**
@@ -147,14 +150,16 @@ public class LaneService {
 
         historialService.registrar("Lane", pool.getId(), AccionHistorial.EDICION,
                 usuario, proceso, "Lanes reordenadas en el pool: " + pool.getNombre());
-        return actualizadas.stream().map(LaneResponse::desde).toList();
+        return actualizadas.stream()
+                .map(lane -> modelMapper.map(lane, LaneResponse.class))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<LaneResponse> listarPorPool(Long poolId) {
         obtenerPoolActivo(poolId);
         return laneRepository.findByPoolIdAndActivoTrueOrderByOrden(poolId).stream()
-                .map(LaneResponse::desde)
+                .map(lane -> modelMapper.map(lane, LaneResponse.class))
                 .toList();
     }
 

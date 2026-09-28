@@ -22,6 +22,15 @@ public record RolProcesoResponse(
         boolean enUso,
         List<String> procesosDondeSeUsa) {
 
+    /**
+     * ModelMapper solo conoce la entidad, no las lanes que usan el rol, así que el
+     * servicio completa enUso y procesosDondeSeUsa después de mapear.
+     */
+    public RolProcesoResponse conUso(List<String> procesos) {
+        return new RolProcesoResponse(id, empresaId, nombre, descripcion, activo,
+                !procesos.isEmpty(), procesos);
+    }
+
     /** Para cuando no hace falta la información de uso (por ejemplo, tras crear el rol). */
     public static RolProcesoResponse desde(RolProceso rol) {
         return desde(rol, List.of());
