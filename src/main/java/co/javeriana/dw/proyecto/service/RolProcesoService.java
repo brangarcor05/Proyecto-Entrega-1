@@ -2,6 +2,7 @@ package co.javeriana.dw.proyecto.service;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,15 +40,17 @@ public class RolProcesoService {
     private final LaneRepository laneRepository;
     private final PermisoService permisoService;
     private final HistorialService historialService;
+    private final ModelMapper modelMapper;
 
     public RolProcesoService(RolProcesoRepository rolProcesoRepository, EmpresaRepository empresaRepository,
                              LaneRepository laneRepository, PermisoService permisoService,
-                             HistorialService historialService) {
+                             HistorialService historialService, ModelMapper modelMapper) {
         this.rolProcesoRepository = rolProcesoRepository;
         this.empresaRepository = empresaRepository;
         this.laneRepository = laneRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
+        this.modelMapper = modelMapper;
     }
 
     /** HU-17: "Solo el administrador de la empresa puede crear roles." */
@@ -75,7 +78,7 @@ public class RolProcesoService {
 
         historialService.registrar("RolProceso", rol.getId(), AccionHistorial.CREACION,
                 usuario, null, "Rol de proceso creado: " + rol.getNombre());
-        return RolProcesoResponse.desde(rol);
+        return modelMapper.map(rol, RolProcesoResponse.class);
     }
 
     /**
@@ -102,7 +105,8 @@ public class RolProcesoService {
 
         historialService.registrar("RolProceso", rol.getId(), AccionHistorial.EDICION,
                 usuario, null, "Rol de proceso actualizado: " + rol.getNombre());
-        return RolProcesoResponse.desde(rol, procesosDondeSeUsa(rol.getId()));
+        return modelMapper.map(rol, RolProcesoResponse.class)
+                .conUso(procesosDondeSeUsa(rol.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -111,7 +115,8 @@ public class RolProcesoService {
         if (!rol.getEmpresa().getId().equals(empresaId)) {
             throw new RecursoNoEncontradoException("Rol de proceso no encontrado: " + rolId);
         }
-        return RolProcesoResponse.desde(rol, procesosDondeSeUsa(rol.getId()));
+        return modelMapper.map(rol, RolProcesoResponse.class)
+                .conUso(procesosDondeSeUsa(rol.getId()));
     }
 
     /**
@@ -130,7 +135,8 @@ public class RolProcesoService {
 
         // N+1 a propósito: el catálogo de roles de una empresa es chico (decenas, no
         // miles), así que no compensa complicar la consulta con una agregación batch.
-        return pagina.map(rol -> RolProcesoResponse.desde(rol, procesosDondeSeUsa(rol.getId())));
+        return pagina.map(rol -> modelMapper.map(rol, RolProcesoResponse.class)
+                .conUso(procesosDondeSeUsa(rol.getId())));
     }
 
     /**
