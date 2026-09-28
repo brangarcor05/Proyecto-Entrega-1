@@ -22,8 +22,9 @@ public class EventoMensajeRecepcionController {
     }
 
     @PostMapping
-    public ResponseEntity<EventoMensajeRecepcionResponse> crear(@Valid @RequestBody CrearEventoMensajeRecepcionRequest request) {
-        EventoMensajeRecepcionResponse response = eventoMensajeRecepcionService.crear(request);
+    public ResponseEntity<EventoMensajeRecepcionResponse> crear(
+            @Valid @RequestBody CrearEventoMensajeRecepcionRequest request, @RequestParam Long usuarioId) {
+        EventoMensajeRecepcionResponse response = eventoMensajeRecepcionService.crear(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -38,13 +39,14 @@ public class EventoMensajeRecepcionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventoMensajeRecepcionResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarEventoMensajeRecepcionRequest request) {
-        return ResponseEntity.ok(eventoMensajeRecepcionService.actualizar(id, request));
+    public ResponseEntity<EventoMensajeRecepcionResponse> actualizar(@PathVariable Long id,
+            @Valid @RequestBody ActualizarEventoMensajeRecepcionRequest request, @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(eventoMensajeRecepcionService.actualizar(id, request, usuarioId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        eventoMensajeRecepcionService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        eventoMensajeRecepcionService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
 }

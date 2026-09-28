@@ -21,8 +21,9 @@ public class EventoMensajeEnvioController {
     }
 
     @PostMapping
-    public ResponseEntity<EventoMensajeEnvioResponse> crear(@Valid @RequestBody CrearEventoMensajeEnvioRequest request) {
-        EventoMensajeEnvioResponse response = eventoMensajeEnvioService.crear(request);
+    public ResponseEntity<EventoMensajeEnvioResponse> crear(
+            @Valid @RequestBody CrearEventoMensajeEnvioRequest request, @RequestParam Long usuarioId) {
+        EventoMensajeEnvioResponse response = eventoMensajeEnvioService.crear(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -37,13 +38,14 @@ public class EventoMensajeEnvioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventoMensajeEnvioResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarEventoMensajeEnvioRequest request) {
-        return ResponseEntity.ok(eventoMensajeEnvioService.actualizar(id, request));
+    public ResponseEntity<EventoMensajeEnvioResponse> actualizar(@PathVariable Long id,
+            @Valid @RequestBody ActualizarEventoMensajeEnvioRequest request, @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(eventoMensajeEnvioService.actualizar(id, request, usuarioId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        eventoMensajeEnvioService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        eventoMensajeEnvioService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
 }

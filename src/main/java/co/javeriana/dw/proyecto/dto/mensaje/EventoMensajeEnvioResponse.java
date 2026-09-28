@@ -6,6 +6,7 @@ import lombok.Data;
 public class EventoMensajeEnvioResponse {
     private Long id;
     private Long procesoId;
+    private Long poolId;
     private String nombreMensaje;
     private String claveCorrelacion;
     private Long poolDestinoId;
