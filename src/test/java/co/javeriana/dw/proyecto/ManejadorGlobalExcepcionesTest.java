@@ -1,8 +1,8 @@
 package co.javeriana.dw.proyecto;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -14,6 +14,7 @@ import co.javeriana.dw.proyecto.exception.ManejadorGlobalExcepciones;
 import co.javeriana.dw.proyecto.exception.PermisoDenegadoException;
 import co.javeriana.dw.proyecto.exception.ReglaNegocioException;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class ManejadorGlobalExcepcionesTest {
 
     private final ManejadorGlobalExcepciones manejador = new ManejadorGlobalExcepciones();
+
+    /**
+     * Spring 6 / Boot 3 marca el primer argumento de
+     * {@link MethodArgumentNotValidException} como {@code @NonNull}.
+     * Como en el test solo nos interesa el {@code BindingResult},
+     * construimos un MethodParameter "dummy" reutilizable.
+     */
+    private static MethodParameter methodParameterDummy() {
+        try {
+            Method metodo = String.class.getDeclaredMethod("length");
+            return new MethodParameter(metodo, -1);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("No se pudo crear MethodParameter dummy", e);
+        }
+    }
 
     // ------------------------------------------------------------------
     // manejarReglaNegocio → 409 CONFLICT
@@ -85,7 +101,7 @@ class ManejadorGlobalExcepcionesTest {
     // ------------------------------------------------------------------
     @Test
     @DisplayName("manejarValidacion debe responder 400 con el mapa de campos inválidos")
-    void manejarValidacionDevuelve400ConCampos()  {
+    void manejarValidacionDevuelve400ConCampos() {
         // Construimos un MethodArgumentNotValidException real
         Object target = new Object();
         BeanPropertyBindingResult bindingResult =
@@ -95,7 +111,7 @@ class ManejadorGlobalExcepcionesTest {
         bindingResult.addError(new FieldError(
                 "empresaForm", "email", "formato inválido"));
         MethodArgumentNotValidException ex =
-                new MethodArgumentNotValidException(null, bindingResult);
+                new MethodArgumentNotValidException(methodParameterDummy(), bindingResult);
 
         ResponseEntity<ErrorResponse> respuesta = manejador.manejarValidacion(ex);
 
@@ -114,7 +130,7 @@ class ManejadorGlobalExcepcionesTest {
 
     @Test
     @DisplayName("manejarValidacion conserva el primer mensaje si hay campos repetidos")
-    void manejarValidacionConservaPrimerMensajePorCampo()  {
+    void manejarValidacionConservaPrimerMensajePorCampo() {
         Object target = new Object();
         BeanPropertyBindingResult bindingResult =
                 new BeanPropertyBindingResult(target, "empresaForm");
@@ -123,7 +139,7 @@ class ManejadorGlobalExcepcionesTest {
         bindingResult.addError(new FieldError(
                 "empresaForm", "nombre", "segundo mensaje"));
         MethodArgumentNotValidException ex =
-                new MethodArgumentNotValidException(null, bindingResult);
+                new MethodArgumentNotValidException(methodParameterDummy(), bindingResult);
 
         ResponseEntity<ErrorResponse> respuesta = manejador.manejarValidacion(ex);
 
