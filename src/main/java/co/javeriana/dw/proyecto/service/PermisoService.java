@@ -37,8 +37,12 @@ public class PermisoService {
 
     @Transactional(readOnly = true)
     public Usuario obtener(Long usuarioId) {
-        return usuarioRepository.findById(usuarioId)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + usuarioId));
+        if (!usuario.isActivo()) {
+            throw new PermisoDenegadoException("El usuario esta inactivo");
+        }
+        return usuario;
     }
 
     @Transactional(readOnly = true)

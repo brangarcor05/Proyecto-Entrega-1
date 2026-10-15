@@ -21,8 +21,9 @@ public class GatewayController {
     }
 
     @PostMapping
-    public ResponseEntity<GatewayResponse> crear(@Valid @RequestBody CrearGatewayRequest request) {
-        GatewayResponse response = gatewayService.crear(request);
+    public ResponseEntity<GatewayResponse> crear(@Valid @RequestBody CrearGatewayRequest request,
+            @RequestParam Long usuarioId) {
+        GatewayResponse response = gatewayService.crear(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -37,13 +38,14 @@ public class GatewayController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GatewayResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarGatewayRequest request) {
-        return ResponseEntity.ok(gatewayService.actualizar(id, request));
+    public ResponseEntity<GatewayResponse> actualizar(@PathVariable Long id,
+            @Valid @RequestBody ActualizarGatewayRequest request, @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(gatewayService.actualizar(id, request, usuarioId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        gatewayService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        gatewayService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
 }

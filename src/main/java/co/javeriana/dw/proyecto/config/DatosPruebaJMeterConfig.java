@@ -8,11 +8,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import co.javeriana.dw.proyecto.dto.arco.CrearArcoRequest;
+import co.javeriana.dw.proyecto.dto.actividad.CrearActividadRequest;
 import co.javeriana.dw.proyecto.dto.empresa.CrearEmpresaRequest;
 import co.javeriana.dw.proyecto.dto.empresa.EmpresaResponse;
 import co.javeriana.dw.proyecto.dto.evento.CrearEventoRequest;
 import co.javeriana.dw.proyecto.dto.evento.EventoResponse;
 import co.javeriana.dw.proyecto.dto.lane.CrearLaneRequest;
+import co.javeriana.dw.proyecto.dto.lane.LaneResponse;
+import co.javeriana.dw.proyecto.dto.gateway.CrearGatewayRequest;
+import co.javeriana.dw.proyecto.dto.mensaje.CrearEventoMensajeEnvioRequest;
+import co.javeriana.dw.proyecto.dto.mensaje.CrearEventoMensajeRecepcionRequest;
 import co.javeriana.dw.proyecto.dto.pool.CrearPoolRequest;
 import co.javeriana.dw.proyecto.dto.pool.PoolResponse;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
@@ -21,11 +26,17 @@ import co.javeriana.dw.proyecto.dto.rolproceso.CrearRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.RolProcesoResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
+import co.javeriana.dw.proyecto.entidad.TipoGateway;
+import co.javeriana.dw.proyecto.entidad.VarianteMensajeCatch;
 import co.javeriana.dw.proyecto.entidad.Empresa;
 import co.javeriana.dw.proyecto.repository.EmpresaRepository;
 import co.javeriana.dw.proyecto.service.ArcoService;
+import co.javeriana.dw.proyecto.service.ActividadService;
 import co.javeriana.dw.proyecto.service.EmpresaService;
 import co.javeriana.dw.proyecto.service.EventoService;
+import co.javeriana.dw.proyecto.service.EventoMensajeEnvioService;
+import co.javeriana.dw.proyecto.service.EventoMensajeRecepcionService;
+import co.javeriana.dw.proyecto.service.GatewayService;
 import co.javeriana.dw.proyecto.service.LaneService;
 import co.javeriana.dw.proyecto.service.PoolService;
 import co.javeriana.dw.proyecto.service.ProcesoService;
@@ -50,6 +61,10 @@ public class DatosPruebaJMeterConfig {
             RolProcesoService rolProcesoService,
             LaneService laneService,
             EventoService eventoService,
+            ActividadService actividadService,
+            GatewayService gatewayService,
+            EventoMensajeEnvioService eventoMensajeEnvioService,
+            EventoMensajeRecepcionService eventoMensajeRecepcionService,
             ArcoService arcoService) {
 
         return argumentos -> {
@@ -121,8 +136,44 @@ public class DatosPruebaJMeterConfig {
                     new CrearRolProcesoRequest(empresa.getId(), "Aprobador", "Revisa y aprueba la solicitud"),
                     administradorId);
 
-            laneService.crear(new CrearLaneRequest(poolPropietario.id(), solicitante.id()), administradorId);
+            LaneResponse laneSolicitante = laneService.crear(
+                    new CrearLaneRequest(poolPropietario.id(), solicitante.id()), administradorId);
             laneService.crear(new CrearLaneRequest(poolPropietario.id(), aprobador.id()), administradorId);
+
+            CrearActividadRequest actividad = new CrearActividadRequest();
+            actividad.setProcesoId(proceso.id());
+            actividad.setLaneId(laneSolicitante.id());
+            actividad.setNombre("Registrar solicitud");
+            actividad.setTipo("USUARIO");
+            actividad.setPosicionX(250.0);
+            actividad.setPosicionY(150.0);
+            actividadService.crear(actividad, administradorId);
+
+            CrearGatewayRequest gateway = new CrearGatewayRequest();
+            gateway.setProcesoId(proceso.id());
+            gateway.setPoolId(poolPropietario.id());
+            gateway.setNombre("Solicitud completa");
+            gateway.setTipo(TipoGateway.EXCLUSIVO);
+            gateway.setPosicionX(400.0);
+            gateway.setPosicionY(150.0);
+            gatewayService.crear(gateway, administradorId);
+
+            CrearEventoMensajeEnvioRequest envio = new CrearEventoMensajeEnvioRequest();
+            envio.setProcesoId(proceso.id());
+            envio.setPoolId(poolPropietario.id());
+            envio.setPoolDestinoId(poolProveedor.id());
+            envio.setNombreMensaje("Orden de compra");
+            envio.setClaveCorrelacion("orden-001");
+            eventoMensajeEnvioService.crear(envio, administradorId);
+
+            CrearEventoMensajeRecepcionRequest recepcion = new CrearEventoMensajeRecepcionRequest();
+            recepcion.setProcesoId(proceso.id());
+            recepcion.setPoolId(poolPropietario.id());
+            recepcion.setNombreMensaje("Confirmacion de proveedor");
+            recepcion.setVariante(VarianteMensajeCatch.INTERMEDIO);
+            recepcion.setOrigenExterno(true);
+            recepcion.setClaveCorrelacion("orden-001");
+            eventoMensajeRecepcionService.crear(recepcion, administradorId);
 
             EventoResponse inicio = eventoService.crear(new CrearEventoRequest(
                     proceso.id(), poolPropietario.id(), "Solicitud recibida", "INICIO", 100.0, 150.0),

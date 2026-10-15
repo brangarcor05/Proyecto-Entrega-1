@@ -12,6 +12,7 @@ import co.javeriana.dw.proyecto.entidad.VarianteMensajeCatch;
 
 public interface EventoMensajeRecepcionRepository extends JpaRepository<EventoMensajeRecepcion, Long> {
     List<EventoMensajeRecepcion> findByProcesoIdAndActivoTrue(Long procesoId);
+    Optional<EventoMensajeRecepcion> findByIdAndActivoTrue(Long id);
 
     // HU-27: validar existencia del Throw correspondiente
     Optional<EventoMensajeRecepcion> findByNombreMensajeAndProcesoId(String nombreMensaje, Long procesoId);

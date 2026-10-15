@@ -10,6 +10,9 @@ public class CrearEventoMensajeEnvioRequest {
     @NotNull(message = "El ID del proceso es obligatorio")
     private Long procesoId;
 
+    @NotNull(message = "El ID del pool que contiene el evento es obligatorio")
+    private Long poolId;
+
     @NotBlank(message = "El nombre del mensaje es obligatorio")
     private String nombreMensaje;
 
