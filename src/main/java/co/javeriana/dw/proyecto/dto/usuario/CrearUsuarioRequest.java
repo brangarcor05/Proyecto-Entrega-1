@@ -24,4 +24,8 @@ public class CrearUsuarioRequest {
 
     @NotNull(message = "El rol de acceso es obligatorio")
     private RolUsuario rolUsuario;
+    
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    private String password;
 }
