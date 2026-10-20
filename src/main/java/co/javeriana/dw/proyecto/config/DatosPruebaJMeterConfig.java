@@ -20,7 +20,6 @@ import co.javeriana.dw.proyecto.dto.proceso.ProcesoResponse;
 import co.javeriana.dw.proyecto.dto.rolproceso.CrearRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.RolProcesoResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
-import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.entidad.Empresa;
 import co.javeriana.dw.proyecto.repository.EmpresaRepository;
 import co.javeriana.dw.proyecto.service.ArcoService;
@@ -77,12 +76,15 @@ public class DatosPruebaJMeterConfig {
 
             Empresa empresaEntidad = empresaRepository.findById(empresa.getId()).orElseThrow();
 
-            usuarioService.invitarUsuario(
-                    empresaEntidad,
-                    new CrearUsuarioRequest("Editor de procesos", "editor@jmeter.local", RolUsuario.EDITOR));
-            usuarioService.invitarUsuario(
-                    empresaEntidad,
-                    new CrearUsuarioRequest("Usuario de consulta", "lector@jmeter.local", RolUsuario.LECTURA));
+            CrearUsuarioRequest editor = new CrearUsuarioRequest();
+            editor.setNombre("Editor de procesos");
+            editor.setEmail("editor@jmeter.local");
+            usuarioService.invitarUsuario(empresaEntidad, editor);
+
+            CrearUsuarioRequest lector = new CrearUsuarioRequest();
+            lector.setNombre("Usuario de consulta");
+            lector.setEmail("lector@jmeter.local");
+            usuarioService.invitarUsuario(empresaEntidad, lector);
 
             Long administradorId = empresa.getAdminUsuarioId();
 

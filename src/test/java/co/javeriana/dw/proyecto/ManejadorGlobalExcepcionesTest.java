@@ -143,7 +143,9 @@ class ManejadorGlobalExcepcionesTest {
 
         ResponseEntity<ErrorResponse> respuesta = manejador.manejarValidacion(ex);
 
-        Map<String, String> campos = respuesta.getBody().camposInvalidos();
+        ErrorResponse body = respuesta.getBody();
+        assertNotNull(body);
+        Map<String, String> campos = body.camposInvalidos();
         assertEquals(1, campos.size());
         assertEquals("primer mensaje", campos.get("nombre"));
     }
