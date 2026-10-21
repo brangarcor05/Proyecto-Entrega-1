@@ -1,11 +1,17 @@
 package co.javeriana.dw.proyecto.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SeguridadConfig {
@@ -16,19 +22,22 @@ public class SeguridadConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configuracion provisional para la primera entrega. Sin este bean, Spring Security
-     * aplica su cadena por defecto y exige usuario y contrasena en todos los endpoints,
-     * lo que impide probar la API.
-     *
-     * El control de acceso real (autenticacion por sesion y restriccion por rol) es de la
-     * entrega final; por ahora los permisos se validan en la capa de servicio.
-     */
     @Bean
-    public SecurityFilterChain cadenaDeFiltros(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(peticiones -> peticiones.anyRequest().permitAll());
-        return http.build();
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(a -> a.anyRequest().permitAll());
+    return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("http://localhost:4200"));
+    config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/api/**", config);
+    return source;
     }
 }

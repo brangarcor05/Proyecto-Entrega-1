@@ -5,6 +5,7 @@ import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
 import co.javeriana.dw.proyecto.entidad.Usuario;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,8 +15,8 @@ public class ModelMapperConfig {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-       
         mapper.addMappings(new PropertyMap<Usuario, UsuarioResponse>() {
             @Override
             protected void configure() {

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
+
 
 @Service
 public class UsuarioService {
@@ -59,7 +59,7 @@ public class UsuarioService {
         
         Usuario usuario = modelMapper.map(request, Usuario.class);
         usuario.setEmpresa(empresa);
-        usuario.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        usuario.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         usuario.setActivo(true);
 
         return modelMapper.map(usuarioRepository.save(usuario), UsuarioResponse.class);
