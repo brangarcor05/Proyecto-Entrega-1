@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -123,5 +124,21 @@ class EmpresaServiceTest {
 
         assertThatThrownBy(() -> empresaService.obtenerPorId(404L))
                 .isInstanceOf(RecursoNoEncontradoException.class);
+    }
+
+    @Test
+    void listar_devuelveEmpresasOrdenadasPorNombre() {
+        Empresa beta = new Empresa();
+        beta.setId(2L);
+        beta.setNombre("Beta");
+        Empresa alfa = new Empresa();
+        alfa.setId(1L);
+        alfa.setNombre("Alfa");
+        when(empresaRepository.findAll()).thenReturn(List.of(beta, alfa));
+
+        List<EmpresaResponse> resultado = empresaService.listar();
+
+        assertThat(resultado).extracting(EmpresaResponse::getNombre)
+                .containsExactly("Alfa", "Beta");
     }
 }

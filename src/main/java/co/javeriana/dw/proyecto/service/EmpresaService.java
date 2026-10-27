@@ -11,6 +11,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
+
 @Service
 public class EmpresaService {
 
@@ -52,5 +55,13 @@ public class EmpresaService {
         Empresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Empresa no encontrada: " + id));
         return modelMapper.map(empresa, EmpresaResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EmpresaResponse> listar() {
+        return empresaRepository.findAll().stream()
+                .sorted(Comparator.comparing(Empresa::getNombre, String.CASE_INSENSITIVE_ORDER))
+                .map(empresa -> modelMapper.map(empresa, EmpresaResponse.class))
+                .toList();
     }
 }

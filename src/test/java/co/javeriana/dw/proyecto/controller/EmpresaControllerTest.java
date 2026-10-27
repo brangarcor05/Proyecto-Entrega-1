@@ -18,6 +18,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.util.List;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.ArgumentMatchers.any;
@@ -151,5 +153,18 @@ class EmpresaControllerTest {
         mockMvc.perform(get("/api/empresas/404")
                         .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listar_devuelve200ConEmpresas() throws Exception {
+        EmpresaResponse response = new EmpresaResponse();
+        response.setId(2L);
+        response.setNombre("Beta S.A.S.");
+        when(empresaService.listar()).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/empresas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2))
+                .andExpect(jsonPath("$[0].nombre").value("Beta S.A.S."));
     }
 }

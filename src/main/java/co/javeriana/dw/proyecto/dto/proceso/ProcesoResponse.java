@@ -3,6 +3,9 @@ package co.javeriana.dw.proyecto.dto.proceso;
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
 import co.javeriana.dw.proyecto.entidad.Proceso;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Informacion de un proceso que devuelve la API.
  * Aplana la empresa a id y nombre: devolver la entidad Empresa completa
@@ -18,6 +21,7 @@ public record ProcesoResponse(
         EstadoProceso estado,
         boolean activo,
         boolean compartido,
+        Set<Long> empresasCompartidasIds,
         /** HU-23: el proceso llega por comparticion, la empresa invitada no puede editarlo. */
         boolean soloLectura) {
 
@@ -29,7 +33,7 @@ public record ProcesoResponse(
      */
     public ProcesoResponse conSoloLectura(boolean soloLectura) {
         return new ProcesoResponse(id, empresaId, empresaNombre, nombre, descripcion,
-                categoria, estado, activo, compartido, soloLectura);
+                categoria, estado, activo, compartido, empresasCompartidasIds, soloLectura);
     }
 
     /**
@@ -50,6 +54,9 @@ public record ProcesoResponse(
                 proceso.getEstado(),
                 proceso.isActivo(),
                 proceso.isCompartido(),
+                proceso.getEmpresasCompartidas().stream()
+                        .map(empresa -> empresa.getId())
+                        .collect(Collectors.toSet()),
                 !esPropio);
     }
 }
