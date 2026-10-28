@@ -23,6 +23,8 @@ public interface ArcoRepository extends JpaRepository<Arco, Long> {
      */
     Optional<Arco> findByOrigenIdAndDestinoId(Long origenId, Long destinoId);
 
+    Optional<Arco> findByProcesoIdAndCanvasId(Long procesoId, String canvasId);
+
     boolean existsByOrigenIdAndDestinoIdAndActivoTrue(Long origenId, Long destinoId);
 
     // para detectar "elemento sin camino de entrada/salida" al eliminar un arco
