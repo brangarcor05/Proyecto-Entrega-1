@@ -14,7 +14,11 @@ public class ActualizarActividadRequest {
 
     @NotNull(message = "El ID de la lane es obligatorio")
     private Long laneId;
+
+    private Long poolId;
+
     private Double posicionX;
     private Double posicionY;
+
     private String canvasId;
 }

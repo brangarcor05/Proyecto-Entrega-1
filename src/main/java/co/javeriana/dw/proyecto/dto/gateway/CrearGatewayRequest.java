@@ -9,10 +9,15 @@ import lombok.Data;
 public class CrearGatewayRequest {
     @NotNull(message = "El ID del proceso es obligatorio")
     private Long procesoId;
+
+    @NotNull(message = "El ID del pool es obligatorio")
+    private Long poolId;
+
     private String nombre;
 
     @NotBlank(message = "El tipo de gateway es obligatorio (EXCLUSIVO, PARALELO, INCLUSIVO)")
-    private TipoGateway tipo; 
+    private TipoGateway tipo;
+
     private Double posicionX;
     private Double posicionY;
     private String canvasId;

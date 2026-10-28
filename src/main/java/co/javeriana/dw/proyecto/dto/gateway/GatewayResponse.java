@@ -7,6 +7,7 @@ import lombok.Data;
 public class GatewayResponse {
     private Long id;
     private Long procesoId;
+    private Long poolId;
     private String nombre;
     private TipoGateway tipo;
     private Double posicionX;

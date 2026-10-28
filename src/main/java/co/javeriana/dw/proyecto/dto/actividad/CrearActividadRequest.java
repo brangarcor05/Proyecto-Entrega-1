@@ -9,6 +9,9 @@ public class CrearActividadRequest {
     @NotNull(message = "El ID del proceso es obligatorio")
     private Long procesoId;
 
+    @NotNull(message = "El ID del pool es obligatorio")
+    private Long poolId;
+
     @NotNull(message = "El ID de la lane es obligatorio")
     private Long laneId;
 
