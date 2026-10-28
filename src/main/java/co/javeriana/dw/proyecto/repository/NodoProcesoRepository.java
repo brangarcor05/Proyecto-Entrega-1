@@ -16,4 +16,6 @@ public interface NodoProcesoRepository extends JpaRepository<NodoProceso, Long> 
     boolean existsByPoolIdAndActivoTrue(Long poolId);
 
     Optional<NodoProceso> findByIdAndActivoTrue(Long id);
+
+    Optional<NodoProceso> findByProcesoIdAndCanvasIdAndActivoTrue(Long procesoId, String canvasId);
 }
