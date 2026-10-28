@@ -14,6 +14,8 @@ public class ActualizarEventoMensajeEnvioRequest {
 
     @NotNull(message = "El ID del pool destino es obligatorio")
     private Long poolDestinoId;
+    
+    private Long poolId;
 
     private Double posicionX;
     private Double posicionY;
