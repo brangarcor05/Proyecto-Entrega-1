@@ -21,6 +21,7 @@ public record NotificacionExternaResponse(
         List<CampoDatoDto> campos,
         Double posicionX,
         Double posicionY,
+        String canvasId,
         boolean activo) {
 
     /** Debe invocarse dentro de una transaccion: las relaciones se cargan de forma perezosa. */
@@ -40,6 +41,7 @@ public record NotificacionExternaResponse(
                 notificacion.getCampos().stream().map(CampoDatoDto::desde).toList(),
                 notificacion.getPosicionX(),
                 notificacion.getPosicionY(),
+                notificacion.getCanvasId(),
                 notificacion.isActivo());
     }
 }

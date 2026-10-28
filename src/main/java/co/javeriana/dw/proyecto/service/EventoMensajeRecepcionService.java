@@ -35,6 +35,7 @@ public class EventoMensajeRecepcionService {
 
         EventoMensajeRecepcion evento = modelMapper.map(request, EventoMensajeRecepcion.class);
         evento.setProceso(proceso);
+        evento.setCanvasId(request.getCanvasId());
         evento.setActivo(true);
 
         evento = eventoMensajeRecepcionRepository.save(evento);
@@ -63,6 +64,7 @@ public class EventoMensajeRecepcionService {
         evento.setDatosEsperados(request.getDatosEsperados());
         evento.setOrigenExterno(request.isOrigenExterno());
         evento.setClaveCorrelacion(request.getClaveCorrelacion());
+        evento.setCanvasId(request.getCanvasId());
 
         if (request.getPosicionX() != null) evento.setPosicionX(request.getPosicionX());
         if (request.getPosicionY() != null) evento.setPosicionY(request.getPosicionY());

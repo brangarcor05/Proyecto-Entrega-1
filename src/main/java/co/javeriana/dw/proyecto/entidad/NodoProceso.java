@@ -39,6 +39,9 @@ public abstract class NodoProceso {
 
     @Column(nullable = false)
     private boolean activo = true;
+    
+    @Column(name = "canvas_id", length = 100)
+    private String canvasId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proceso_id", nullable = false)

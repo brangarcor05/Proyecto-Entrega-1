@@ -15,4 +15,5 @@ public class EventoMensajeRecepcionResponse {
     private Double posicionX;
     private Double posicionY;
     private Boolean activo;
+    private String canvasId;
 }

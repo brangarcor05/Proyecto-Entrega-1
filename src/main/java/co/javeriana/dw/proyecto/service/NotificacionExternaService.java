@@ -67,6 +67,7 @@ public class NotificacionExternaService {
         notificacion.setProceso(proceso);
         notificacion.setPool(obtenerPoolContenedor(request.poolId(), proceso));
         notificacion.setActivo(true);
+        notificacion.setCanvasId(request.canvasId());
         aplicar(notificacion, proceso, request.nombre(), request.poolDestinoId(), request.tipoDestino(),
                 request.momentoProceso(), request.accionSiFalla(), request.actividadManejoErrorId(),
                 request.campos(), request.posicionX(), request.posicionY());
@@ -83,6 +84,7 @@ public class NotificacionExternaService {
                                                   Long usuarioId) {
         EventoNotificacionExterna notificacion = obtenerActiva(notificacionId);
         Proceso proceso = notificacion.getProceso();
+        notificacion.setCanvasId(request.canvasId());
         Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
         validarEsDeLaEmpresa(usuario, proceso);
 

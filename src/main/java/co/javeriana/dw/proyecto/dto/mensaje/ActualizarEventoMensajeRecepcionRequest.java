@@ -20,4 +20,5 @@ public class ActualizarEventoMensajeRecepcionRequest {
 
     private Double posicionX;
     private Double posicionY;
+    private String canvasId;
 }

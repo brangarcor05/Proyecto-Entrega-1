@@ -15,4 +15,5 @@ public class CrearGatewayRequest {
     private TipoGateway tipo; 
     private Double posicionX;
     private Double posicionY;
+    private String canvasId;
 }

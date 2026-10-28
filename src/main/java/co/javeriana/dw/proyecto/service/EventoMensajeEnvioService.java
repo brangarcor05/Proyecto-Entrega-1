@@ -42,6 +42,7 @@ public class EventoMensajeEnvioService {
 
         EventoMensajeEnvio evento = modelMapper.map(request, EventoMensajeEnvio.class);
         evento.setProceso(proceso);
+        evento.setCanvasId(request.getCanvasId());
         evento.setPoolDestino(poolDestino);
         evento.setActivo(true);
 
@@ -70,6 +71,7 @@ public class EventoMensajeEnvioService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pool de destino no encontrado: " + request.getPoolDestinoId()));
 
         evento.setNombreMensaje(request.getNombreMensaje());
+        evento.setCanvasId(request.getCanvasId());
         evento.setClaveCorrelacion(request.getClaveCorrelacion());
         evento.setPoolDestino(poolDestino);
 

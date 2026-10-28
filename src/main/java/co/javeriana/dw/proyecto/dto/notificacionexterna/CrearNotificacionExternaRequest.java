@@ -45,5 +45,6 @@ public record CrearNotificacionExternaRequest(
         List<CampoDatoDto> campos,
 
         Double posicionX,
-        Double posicionY) {
+        Double posicionY,
+        String canvasId) {
 }

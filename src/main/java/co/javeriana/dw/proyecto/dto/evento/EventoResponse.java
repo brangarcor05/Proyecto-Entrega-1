@@ -11,7 +11,8 @@ public record EventoResponse(
         String tipo,
         Double posicionX,
         Double posicionY,
-        boolean activo) {
+        boolean activo,
+        String canvasId) {
 
     /** Debe invocarse dentro de una transaccion: proceso y pool se cargan de forma perezosa. */
     public static EventoResponse desde(Evento evento) {
@@ -23,6 +24,8 @@ public record EventoResponse(
                 evento.getTipo(),
                 evento.getPosicionX(),
                 evento.getPosicionY(),
-                evento.isActivo());
+                evento.isActivo(),
+                evento.getCanvasId()
+        );
     }
 }

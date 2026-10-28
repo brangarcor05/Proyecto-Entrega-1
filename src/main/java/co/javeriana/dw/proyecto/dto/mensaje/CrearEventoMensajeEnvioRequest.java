@@ -20,4 +20,5 @@ public class CrearEventoMensajeEnvioRequest {
 
     private Double posicionX;
     private Double posicionY;
+    private String canvasId;
 }

@@ -12,4 +12,5 @@ public class ActualizarGatewayRequest {
     private TipoGateway tipo;
     private Double posicionX;
     private Double posicionY;
+    private String canvasId;
 }

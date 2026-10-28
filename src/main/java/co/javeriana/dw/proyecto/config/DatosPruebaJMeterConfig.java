@@ -126,16 +126,17 @@ public class DatosPruebaJMeterConfig {
             laneService.crear(new CrearLaneRequest(poolPropietario.id(), solicitante.id()), administradorId);
             laneService.crear(new CrearLaneRequest(poolPropietario.id(), aprobador.id()), administradorId);
 
-            EventoResponse inicio = eventoService.crear(new CrearEventoRequest(
-                    proceso.id(), poolPropietario.id(), "Solicitud recibida", "INICIO", 100.0, 150.0),
-                    administradorId);
-            EventoResponse fin = eventoService.crear(new CrearEventoRequest(
-                    proceso.id(), poolPropietario.id(), "Compra finalizada", "FIN", 700.0, 150.0),
-                    administradorId);
+            /*CrearEventoRequest solicitudRecibida = new CrearEventoRequest(
+                    proceso.id(), poolPropietario.id(), "Solicitud recibida", "INICIO", 100.0, 150.0, null, null);
+            EventoResponse inicio = eventoService.crear(solicitudRecibida, administradorId);
 
-            arcoService.crear(new CrearArcoRequest(
+            CrearEventoRequest compraFinalizada = new CrearEventoRequest(
+                    proceso.id(), poolPropietario.id(), "Compra finalizada", "FIN", 700.0, 150.0, null, null);
+            EventoResponse fin = eventoService.crear(compraFinalizada, administradorId);*/
+
+            /*arcoService.crear(new CrearArcoRequest(
                     proceso.id(), inicio.id(), fin.id(), "Flujo principal", null),
-                    administradorId);
+                    administradorId);*/
 
             System.out.println("Datos JMeter cargados: empresaId=" + empresa.getId()
                     + ", usuarioAdminId=" + administradorId

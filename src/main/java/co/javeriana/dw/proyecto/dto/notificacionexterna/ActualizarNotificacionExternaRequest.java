@@ -35,5 +35,6 @@ public record ActualizarNotificacionExternaRequest(
         List<CampoDatoDto> campos,
 
         Double posicionX,
-        Double posicionY) {
+        Double posicionY,
+        String canvasId) {
 }

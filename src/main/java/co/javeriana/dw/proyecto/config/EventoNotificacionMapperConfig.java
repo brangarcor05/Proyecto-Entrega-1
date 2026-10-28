@@ -27,7 +27,7 @@ public class EventoNotificacionMapperConfig {
             return new EventoResponse(
                     evento.getId(), evento.getProceso().getId(), evento.getPool().getId(),
                     evento.getNombre(), evento.getTipo(), evento.getPosicionX(),
-                    evento.getPosicionY(), evento.isActivo());
+                    evento.getPosicionY(), evento.isActivo(), evento.getCanvasId());
         });
         mapper.createTypeMap(EventoNotificacionExterna.class, NotificacionExternaResponse.class)
                 .setConverter(context -> {
@@ -42,7 +42,7 @@ public class EventoNotificacionMapperConfig {
                             notificacion.getCampos().stream()
                                     .map(campo -> mapper.map(campo, CampoDatoDto.class)).toList(),
                             notificacion.getPosicionX(), notificacion.getPosicionY(),
-                            notificacion.isActivo());
+                            notificacion.getCanvasId(), notificacion.isActivo());
                 });
     }
 }

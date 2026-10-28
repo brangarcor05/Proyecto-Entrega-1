@@ -34,6 +34,7 @@ public class GatewayService {
 
         Gateway gateway = modelMapper.map(request, Gateway.class);
         gateway.setProceso(proceso);
+        gateway.setCanvasId(request.getCanvasId());
         gateway.setActivo(true);
 
         gateway = gatewayRepository.save(gateway);
@@ -59,6 +60,7 @@ public class GatewayService {
 
         gateway.setNombre(request.getNombre());
         gateway.setTipo(request.getTipo());
+        gateway.setCanvasId(request.getCanvasId());
         if (request.getPosicionX() != null) gateway.setPosicionX(request.getPosicionX());
         if (request.getPosicionY() != null) gateway.setPosicionY(request.getPosicionY());
 

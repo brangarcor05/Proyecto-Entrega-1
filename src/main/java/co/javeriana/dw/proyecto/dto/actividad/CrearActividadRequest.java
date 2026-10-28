@@ -19,4 +19,5 @@ public class CrearActividadRequest {
     private String tipo;
     private Double posicionX;
     private Double posicionY;
+    private String canvasId;
 }

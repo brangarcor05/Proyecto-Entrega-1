@@ -23,5 +23,7 @@ public record CrearEventoRequest(
         String tipo,
 
         Double posicionX,
-        Double posicionY) {
+        Double posicionY,
+        String canvasId
+) {
 }

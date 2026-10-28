@@ -64,6 +64,7 @@ public class EventoService {
         evento.setActivo(true);
         evento.setProceso(proceso);
         evento.setPool(pool);
+        evento.setCanvasId(request.canvasId());
         evento = eventoRepository.save(evento);
 
         historialService.registrar("Evento", evento.getId(), AccionHistorial.CREACION,
@@ -71,7 +72,7 @@ public class EventoService {
         return modelMapper.map(evento, EventoResponse.class);
     }
 
-    @Transactional
+       @Transactional
     public EventoResponse actualizar(Long eventoId, ActualizarEventoRequest request, Long usuarioId) {
         Evento evento = obtenerActivo(eventoId);
         Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
@@ -81,6 +82,8 @@ public class EventoService {
         evento.setTipo(request.tipo());
         evento.setPosicionX(request.posicionX());
         evento.setPosicionY(request.posicionY());
+        evento.setCanvasId(request.canvasId()); // <-- NUEVA LÍNEA
+        
         evento = eventoRepository.save(evento);
 
         historialService.registrar("Evento", evento.getId(), AccionHistorial.EDICION,

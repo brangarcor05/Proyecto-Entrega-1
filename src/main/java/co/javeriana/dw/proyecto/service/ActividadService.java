@@ -42,6 +42,7 @@ public class ActividadService {
         actividad.setProceso(proceso);
         actividad.setLane(lane);
         actividad.setActivo(true);
+        actividad.setCanvasId(request.getCanvasId());
 
         actividad = actividadRepository.save(actividad);
         return mapearAResponse(actividad);
@@ -70,6 +71,7 @@ public class ActividadService {
         actividad.setNombre(request.getNombre());
         actividad.setTipo(request.getTipo());
         actividad.setLane(lane);
+        actividad.setCanvasId(request.getCanvasId());
 
         if (request.getPosicionX() != null) actividad.setPosicionX(request.getPosicionX());
         if (request.getPosicionY() != null) actividad.setPosicionY(request.getPosicionY());
