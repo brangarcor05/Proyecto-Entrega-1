@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -42,17 +43,10 @@ public class Proceso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*
-     Muchos procesos pueden pertenecer a una empresa.
-     Cada proceso pertenece únicamente a una empresa.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
 
-    /*
-     El nombre debe ser único dentro de cada empresa.
-     */
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
 
@@ -65,14 +59,13 @@ public class Proceso {
     @Column(name = "categoria", nullable = false, length = 100)
     private String categoria;
 
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     private EstadoProceso estado = EstadoProceso.BORRADOR;
 
-    
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
+
     @ManyToMany
     @JoinTable(
         name = "proceso_empresa_compartida",
@@ -81,12 +74,11 @@ public class Proceso {
     )
     private Set<Empresa> empresasCompartidas = new HashSet<>();
 
+    // NUEVO CAMPO: Aquí se guarda el XML del diagrama BPMN generado por bpmn-js
+    @Lob
+    @Column(name = "diagrama_xml", columnDefinition = "TEXT")
+    private String diagramaXml;
 
-    /*
-     Constructor para crear un proceso nuevo.
-     El estado y activo no se reciben porque todo proceso
-     debe comenzar como BORRADOR y activo.
-     */
     public Proceso(
             Empresa empresa,
             String nombre,

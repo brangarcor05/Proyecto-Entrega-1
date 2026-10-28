@@ -36,6 +36,7 @@ public class SeguridadConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
                 "http://127.0.0.1:4200",
+                "http://192.168.*.*:4200",
                 "https://*.app.github.dev"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

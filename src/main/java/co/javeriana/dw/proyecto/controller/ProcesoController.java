@@ -111,4 +111,26 @@ public class ProcesoController {
         procesoService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
+        // --- NUEVOS ENDPOINTS PARA EL DIAGRAMA BPMN ---
+
+    @GetMapping("/{id}/diagrama")
+    public ResponseEntity<String> obtenerDiagrama(
+            @PathVariable Long id,
+            @RequestParam Long empresaId) {
+        
+        String xml = procesoService.obtenerDiagrama(id, empresaId);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/plain; charset=UTF-8")
+                .body(xml);
+    }
+
+    @PutMapping(value = "/{id}/diagrama", consumes = "text/plain")
+    public ResponseEntity<Void> guardarDiagrama(
+            @PathVariable Long id,
+            @RequestBody String xml,
+            @RequestParam Long usuarioId) {
+        
+        procesoService.guardarDiagrama(id, xml, usuarioId);
+        return ResponseEntity.noContent().build();
+    }
 }

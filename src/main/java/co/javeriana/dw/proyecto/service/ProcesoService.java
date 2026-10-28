@@ -272,4 +272,28 @@ public class ProcesoService {
         return procesoRepository.findByIdAndEstadoNot(id, EstadoProceso.INACTIVO)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Proceso no encontrado: " + id));
     }
+        // --- NUEVOS MÉTODOS PARA EL DIAGRAMA BPMN ---
+
+    @Transactional(readOnly = true)
+    public String obtenerDiagrama(Long procesoId, Long empresaId) {
+        Proceso proceso = obtenerActivo(procesoId);
+        if (!puedeConsultar(proceso, empresaId)) {
+            throw new RecursoNoEncontradoException("Proceso no encontrado: " + procesoId);
+        }
+        // Si no hay diagrama, devolvemos un string vacío para que el frontend sepa que debe crear uno nuevo
+        return proceso.getDiagramaXml() != null ? proceso.getDiagramaXml() : "";
+    }
+
+    @Transactional
+    public void guardarDiagrama(Long procesoId, String xml, Long usuarioId) {
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
+        Proceso proceso = obtenerActivo(procesoId);
+        validarEsPropietario(usuario, proceso);
+        
+        proceso.setDiagramaXml(xml);
+        procesoRepository.save(proceso);
+        
+        historialService.registrar("Proceso", proceso.getId(), AccionHistorial.EDICION,
+                usuario, proceso, "Diagrama BPMN actualizado");
+    }
 }
