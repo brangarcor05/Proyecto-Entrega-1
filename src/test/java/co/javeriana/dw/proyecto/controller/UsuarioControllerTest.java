@@ -138,7 +138,7 @@ class UsuarioControllerTest {
         UsuarioResponse response = new UsuarioResponse();
         response.setId(5L);
         response.setRolUsuario(RolUsuario.ADMIN);
-        when(usuarioService.cambiarRolAcceso(eq(5L), any())).thenReturn(response);
+        when(usuarioService.cambiarRolAcceso(eq(5L), any(), any())).thenReturn(response);
 
         CambiarRolRequest request = new CambiarRolRequest();
         request.setRolUsuario(RolUsuario.ADMIN);
@@ -153,7 +153,7 @@ class UsuarioControllerTest {
 
     @Test
     void cambiarRol_devuelve404_cuandoUsuarioNoExiste() throws Exception {
-        when(usuarioService.cambiarRolAcceso(eq(99L), any()))
+        when(usuarioService.cambiarRolAcceso(eq(99L), any(), any()))
                 .thenThrow(new RecursoNoEncontradoException("Usuario no encontrado"));
 
         CambiarRolRequest request = new CambiarRolRequest();

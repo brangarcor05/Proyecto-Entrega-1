@@ -1,6 +1,5 @@
 package co.javeriana.dw.proyecto.service;
 
-import co.javeriana.dw.proyecto.config.ModelMapperConfig;
 import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
 import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
@@ -13,11 +12,14 @@ import co.javeriana.dw.proyecto.exception.CredencialesInvalidasException;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.repository.UsuarioRepository;
+import co.javeriana.dw.proyecto.security.JwtService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -41,14 +44,18 @@ class UsuarioServiceTest {
 
     private UsuarioService usuarioService;
 
+    private ModelMapper modelMapper; 
+
+    private JwtService jwtService;
+
     // Uso el encoder real (no un mock) para poder verificar que el hash guardado
     // realmente corresponde a la contrasena en texto plano que se envio.
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     void setUp() {
-        usuarioService = new UsuarioService(usuarioRepository, passwordEncoder,
-                new ModelMapperConfig().modelMapper());
+        usuarioService = new UsuarioService(usuarioRepository, passwordEncoder, 
+                          modelMapper, jwtService);
     }
 
     private Empresa empresaDePrueba() {
@@ -91,12 +98,13 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void invitarUsuario_creaUsuarioConRolIndicado_yContrasenaAleatoria() {
+    void invitarUsuario_creaUsuarioConRolIndicado() {
         Empresa empresa = empresaDePrueba();
         CrearUsuarioRequest request = new CrearUsuarioRequest();
         request.setNombre("Ana Ruiz");
         request.setEmail("ana@acme.com");
         request.setRolUsuario(RolUsuario.EDITOR);
+        request.setPassword("password123");
 
         when(usuarioRepository.existsByEmail("ana@acme.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> {
@@ -104,6 +112,13 @@ class UsuarioServiceTest {
             u.setId(20L);
             return u;
         });
+
+        // Configuramos el mock de modelMapper para que devuelva un UsuarioResponse
+        UsuarioResponse responseSimulada = new UsuarioResponse();
+        responseSimulada.setRolUsuario(RolUsuario.EDITOR);
+        responseSimulada.setEmpresaId(1L);
+        responseSimulada.setEmpresaNombre("Acme S.A.S.");
+        when(modelMapper.map(any(Usuario.class), eq(UsuarioResponse.class))).thenReturn(responseSimulada);
 
         UsuarioResponse response = usuarioService.invitarUsuario(empresa, request);
 
@@ -127,18 +142,26 @@ class UsuarioServiceTest {
                 .isInstanceOf(NombreDuplicadoException.class);
     }
 
-    @Test
+        @Test
     void cambiarRolAcceso_actualizaRolUsuario() {
         Usuario usuario = new Usuario();
         usuario.setId(5L);
         usuario.setRolUsuario(RolUsuario.LECTURA);
+        Empresa empresa = empresaDePrueba();
+        usuario.setEmpresa(empresa);
+        
         when(usuarioRepository.findById(5L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
         CambiarRolRequest request = new CambiarRolRequest();
         request.setRolUsuario(RolUsuario.ADMIN);
 
-        UsuarioResponse response = usuarioService.cambiarRolAcceso(5L, request);
+        // Configuramos el mock de modelMapper
+        UsuarioResponse responseSimulada = new UsuarioResponse();
+        responseSimulada.setRolUsuario(RolUsuario.ADMIN);
+        when(modelMapper.map(any(Usuario.class), eq(UsuarioResponse.class))).thenReturn(responseSimulada);
+
+        UsuarioResponse response = usuarioService.cambiarRolAcceso(5L, 1L, request);
 
         assertThat(response.getRolUsuario()).isEqualTo(RolUsuario.ADMIN);
     }
@@ -149,7 +172,7 @@ class UsuarioServiceTest {
         CambiarRolRequest request = new CambiarRolRequest();
         request.setRolUsuario(RolUsuario.ADMIN);
 
-        assertThatThrownBy(() -> usuarioService.cambiarRolAcceso(99L, request))
+        assertThatThrownBy(() -> usuarioService.cambiarRolAcceso(99L, 1L, request))
                 .isInstanceOf(RecursoNoEncontradoException.class);
     }
 
@@ -160,7 +183,7 @@ class UsuarioServiceTest {
         usuario.setActivo(true);
         when(usuarioRepository.findById(7L)).thenReturn(Optional.of(usuario));
 
-        usuarioService.desactivar(7L);
+        usuarioService.desactivar(7L, 1L);
 
         assertThat(usuario.isActivo()).isFalse();
         verify(usuarioRepository).save(usuario);
@@ -176,6 +199,15 @@ class UsuarioServiceTest {
         usuario.setEmpresa(empresaDePrueba());
         when(usuarioRepository.findByEmail("juan@acme.com")).thenReturn(Optional.of(usuario));
 
+        // El mock de JwtService debe devolver un token cuando se le pida
+        when(jwtService.generarToken(any(Usuario.class))).thenReturn("token-falso-de-prueba");
+
+        // El mock de ModelMapper debe devolver una SesionResponse
+        SesionResponse sesionSimulada = new SesionResponse();
+        sesionSimulada.setUsuarioId(3L);
+        sesionSimulada.setEmpresaId(1L);
+        when(modelMapper.map(any(Usuario.class), eq(SesionResponse.class))).thenReturn(sesionSimulada);
+
         LoginRequest login = new LoginRequest();
         login.setEmail("juan@acme.com");
         login.setPassword("claveCorrecta");
@@ -184,6 +216,7 @@ class UsuarioServiceTest {
 
         assertThat(sesion.getUsuarioId()).isEqualTo(3L);
         assertThat(sesion.getEmpresaId()).isEqualTo(1L);
+        verify(jwtService).generarToken(any(Usuario.class)); // Verificamos que se llamó
     }
 
     @Test
@@ -237,6 +270,11 @@ class UsuarioServiceTest {
         u1.setId(1L);
         u1.setEmpresa(empresaDePrueba());
         when(usuarioRepository.findByEmpresaId(1L)).thenReturn(List.of(u1));
+
+        // Configuramos el mock de modelMapper
+        UsuarioResponse responseSimulada = new UsuarioResponse();
+        responseSimulada.setId(1L);
+        when(modelMapper.map(any(Usuario.class), eq(UsuarioResponse.class))).thenReturn(responseSimulada);
 
         List<UsuarioResponse> resultado = usuarioService.listarPorEmpresa(1L);
 

@@ -15,4 +15,5 @@ public class SesionResponse {
     private RolUsuario rolUsuario;
     private Long empresaId;
     private String empresaNombre;
+    private String token;
 }
