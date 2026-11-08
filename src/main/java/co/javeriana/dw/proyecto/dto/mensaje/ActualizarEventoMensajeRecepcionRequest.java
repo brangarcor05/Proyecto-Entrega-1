@@ -14,10 +14,12 @@ public class ActualizarEventoMensajeRecepcionRequest {
     @NotNull(message = "La variante del mensaje es obligatoria")
     private VarianteMensajeCatch variante;
 
+    private Long poolId;
+    
     private String datosEsperados;
     private boolean origenExterno;
     private String claveCorrelacion;
-
+    
     private Double posicionX;
     private Double posicionY;
     private String canvasId;

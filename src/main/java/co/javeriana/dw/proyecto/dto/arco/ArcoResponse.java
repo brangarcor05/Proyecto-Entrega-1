@@ -15,6 +15,7 @@ public record ArcoResponse(
         String destinoNombre,
         String etiqueta,
         String condicion,
+        String canvasId,
         boolean activo) {
 
     /** Debe invocarse dentro de una transaccion: los nodos se cargan de forma perezosa. */
@@ -28,6 +29,7 @@ public record ArcoResponse(
                 arco.getDestino().getNombre(),
                 arco.getEtiqueta(),
                 arco.getCondicion(),
+                arco.getCanvasId(),
                 arco.isActivo());
     }
 }

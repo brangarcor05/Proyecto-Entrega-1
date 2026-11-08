@@ -25,7 +25,8 @@ public class EventoMensajeEnvioService {
     private final PoolRepository poolRepository;
     private final ModelMapper modelMapper;
 
-    public EventoMensajeEnvioService(EventoMensajeEnvioRepository eventoMensajeEnvioRepository, ProcesoRepository procesoRepository, PoolRepository poolRepository, ModelMapper modelMapper) {
+    public EventoMensajeEnvioService(EventoMensajeEnvioRepository eventoMensajeEnvioRepository,
+            ProcesoRepository procesoRepository, PoolRepository poolRepository, ModelMapper modelMapper) {
         this.eventoMensajeEnvioRepository = eventoMensajeEnvioRepository;
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
@@ -35,16 +36,29 @@ public class EventoMensajeEnvioService {
     @Transactional
     public EventoMensajeEnvioResponse crear(CrearEventoMensajeEnvioRequest request) {
         Proceso proceso = procesoRepository.findById(request.getProcesoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Proceso no encontrado: " + request.getProcesoId()));
+                .orElseThrow(
+                        () -> new RecursoNoEncontradoException("Proceso no encontrado: " + request.getProcesoId()));
+
+        Pool pool = poolRepository.findById(request.getPoolId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pool no encontrado: " + request.getPoolId()));
 
         Pool poolDestino = poolRepository.findById(request.getPoolDestinoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Pool de destino no encontrado: " + request.getPoolDestinoId()));
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Pool de destino no encontrado: " + request.getPoolDestinoId()));
 
         EventoMensajeEnvio evento = modelMapper.map(request, EventoMensajeEnvio.class);
         evento.setProceso(proceso);
+        evento.setPool(pool);
         evento.setCanvasId(request.getCanvasId());
         evento.setPoolDestino(poolDestino);
         evento.setActivo(true);
+
+        evento.setNombre(request.getNombreMensaje());
+
+        if (evento.getPosicionX() == null)
+            evento.setPosicionX(0.0);
+        if (evento.getPosicionY() == null)
+            evento.setPosicionY(0.0);
 
         evento = eventoMensajeEnvioRepository.save(evento);
         return mapearAResponse(evento);
@@ -67,16 +81,25 @@ public class EventoMensajeEnvioService {
         EventoMensajeEnvio evento = eventoMensajeEnvioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Evento de mensaje envío no encontrado: " + id));
 
+        if (request.getPoolId() != null) {
+            Pool pool = poolRepository.findById(request.getPoolId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Pool no encontrado: " + request.getPoolId()));
+            evento.setPool(pool);
+        }
+
         Pool poolDestino = poolRepository.findById(request.getPoolDestinoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Pool de destino no encontrado: " + request.getPoolDestinoId()));
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Pool de destino no encontrado: " + request.getPoolDestinoId()));
 
         evento.setNombreMensaje(request.getNombreMensaje());
         evento.setCanvasId(request.getCanvasId());
         evento.setClaveCorrelacion(request.getClaveCorrelacion());
         evento.setPoolDestino(poolDestino);
 
-        if (request.getPosicionX() != null) evento.setPosicionX(request.getPosicionX());
-        if (request.getPosicionY() != null) evento.setPosicionY(request.getPosicionY());
+        if (request.getPosicionX() != null)
+            evento.setPosicionX(request.getPosicionX());
+        if (request.getPosicionY() != null)
+            evento.setPosicionY(request.getPosicionY());
 
         evento = eventoMensajeEnvioRepository.save(evento);
         return mapearAResponse(evento);
@@ -94,6 +117,9 @@ public class EventoMensajeEnvioService {
         EventoMensajeEnvioResponse response = modelMapper.map(evento, EventoMensajeEnvioResponse.class);
         if (evento.getProceso() != null) {
             response.setProcesoId(evento.getProceso().getId());
+        }
+        if (evento.getPool() != null) {
+            response.setPoolId(evento.getPool().getId());
         }
         if (evento.getPoolDestino() != null) {
             response.setPoolDestinoId(evento.getPoolDestino().getId());

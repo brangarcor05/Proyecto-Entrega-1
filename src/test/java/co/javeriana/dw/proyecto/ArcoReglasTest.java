@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import co.javeriana.dw.proyecto.dto.arco.ActualizarArcoRequest;
 import co.javeriana.dw.proyecto.dto.arco.ArcoResponse;
 import co.javeriana.dw.proyecto.dto.arco.CrearArcoRequest;
+import co.javeriana.dw.proyecto.dto.arco.SincronizarArcoRequest;
 import co.javeriana.dw.proyecto.dto.pool.CrearPoolRequest;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
 import co.javeriana.dw.proyecto.entidad.Actividad;
@@ -230,6 +233,68 @@ class ArcoReglasTest {
         assertThrows(PermisoDenegadoException.class,
                 () -> arcoService.crear(new CrearArcoRequest(
                         proceso.getId(), inicio.getId(), radicar.getId(), null, null), lector.getId()));
+    }
+
+    @Test
+    @DisplayName("El editor sincroniza SequenceFlow por canvasId sin crear duplicados")
+    void sincronizaArcosVisualesSinDuplicarlos() {
+        asignarCanvasId(inicio, "StartEvent_1");
+        asignarCanvasId(radicar, "Activity_1");
+        asignarCanvasId(decision, "Gateway_1");
+
+        List<ArcoResponse> primeraSincronizacion = arcoService.sincronizar(
+                proceso.getId(),
+                List.of(
+                        flujo("Flow_1", "StartEvent_1", "Activity_1", "Radicar", null),
+                        flujo("Flow_2", "Activity_1", "Gateway_1", null, null)),
+                editor.getId());
+
+        assertEquals(2, primeraSincronizacion.size());
+        assertTrue(primeraSincronizacion.stream().anyMatch(arco -> "Flow_1".equals(arco.canvasId())));
+
+        List<ArcoResponse> segundaSincronizacion = arcoService.sincronizar(
+                proceso.getId(),
+                List.of(
+                        flujo("Flow_1", "StartEvent_1", "Activity_1", "Continuar", null),
+                        flujo("Flow_2", "Activity_1", "Gateway_1", null, null)),
+                editor.getId());
+
+        assertEquals(2, segundaSincronizacion.size());
+        assertEquals("Continuar", segundaSincronizacion.stream()
+                .filter(arco -> "Flow_1".equals(arco.canvasId()))
+                .findFirst().orElseThrow().etiqueta());
+    }
+
+    @Test
+    @DisplayName("La sincronizacion elimina los arcos visuales ausentes para el administrador")
+    void sincronizacionEliminaArcosAusentes() {
+        asignarCanvasId(inicio, "StartEvent_1");
+        asignarCanvasId(radicar, "Activity_1");
+        asignarCanvasId(decision, "Gateway_1");
+
+        arcoService.sincronizar(proceso.getId(), List.of(
+                flujo("Flow_1", "StartEvent_1", "Activity_1", null, null),
+                flujo("Flow_2", "Activity_1", "Gateway_1", null, null)), admin.getId());
+
+        List<ArcoResponse> resultado = arcoService.sincronizar(
+                proceso.getId(),
+                List.of(flujo("Flow_2", "Activity_1", "Gateway_1", null, null)),
+                admin.getId());
+
+        assertEquals(1, resultado.size());
+        assertEquals("Flow_2", resultado.getFirst().canvasId());
+    }
+
+    private SincronizarArcoRequest flujo(String canvasId, String origenCanvasId,
+                                         String destinoCanvasId, String etiqueta,
+                                         String condicion) {
+        return new SincronizarArcoRequest(
+                canvasId, origenCanvasId, destinoCanvasId, etiqueta, condicion);
+    }
+
+    private void asignarCanvasId(NodoProceso nodo, String canvasId) {
+        nodo.setCanvasId(canvasId);
+        nodoProcesoRepository.save(nodo);
     }
 
     private ArcoResponse crearArco(NodoProceso origen, NodoProceso destino, String condicion) {

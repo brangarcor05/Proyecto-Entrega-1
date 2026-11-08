@@ -64,6 +64,7 @@ class UsuarioControllerTest {
         request.setNombre("Ana Ruiz");
         request.setEmail("ana@acme.com");
         request.setRolUsuario(RolUsuario.EDITOR);
+        request.setPassword("claveSegura123");
         return request;
     }
 

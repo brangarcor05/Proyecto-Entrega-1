@@ -98,13 +98,13 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void invitarUsuario_creaUsuarioConRolIndicado() {
+    void invitarUsuario_creaUsuarioConRolIndicado_yContrasenaSolicitada() {
         Empresa empresa = empresaDePrueba();
         CrearUsuarioRequest request = new CrearUsuarioRequest();
         request.setNombre("Ana Ruiz");
         request.setEmail("ana@acme.com");
         request.setRolUsuario(RolUsuario.EDITOR);
-        request.setPassword("password123");
+        request.setPassword("claveSegura123");
 
         when(usuarioRepository.existsByEmail("ana@acme.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> {
@@ -125,6 +125,8 @@ class UsuarioServiceTest {
         assertThat(response.getRolUsuario()).isEqualTo(RolUsuario.EDITOR);
         assertThat(response.getEmpresaId()).isEqualTo(1L);
         assertThat(response.getEmpresaNombre()).isEqualTo("Acme S.A.S.");
+        verify(usuarioRepository).save(argThat(usuario ->
+                passwordEncoder.matches("claveSegura123", usuario.getPasswordHash())));
     }
 
     @Test

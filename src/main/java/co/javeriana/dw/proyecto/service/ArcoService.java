@@ -2,6 +2,8 @@ package co.javeriana.dw.proyecto.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import co.javeriana.dw.proyecto.dto.arco.ActualizarArcoRequest;
 import co.javeriana.dw.proyecto.dto.arco.ArcoEliminadoResponse;
 import co.javeriana.dw.proyecto.dto.arco.ArcoResponse;
 import co.javeriana.dw.proyecto.dto.arco.CrearArcoRequest;
+import co.javeriana.dw.proyecto.dto.arco.SincronizarArcoRequest;
 import co.javeriana.dw.proyecto.entidad.AccionHistorial;
 import co.javeriana.dw.proyecto.entidad.Arco;
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
@@ -130,6 +133,72 @@ public class ArcoService {
                 .toList();
     }
 
+    @Transactional
+    public List<ArcoResponse> sincronizar(Long procesoId, List<SincronizarArcoRequest> solicitudes,
+                                          Long usuarioId) {
+        Proceso proceso = obtenerProcesoActivo(procesoId);
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
+        validarEsDeLaEmpresa(usuario, proceso);
+
+        Set<String> canvasIds = new HashSet<>();
+        Set<String> conexiones = new HashSet<>();
+
+        for (SincronizarArcoRequest solicitud : solicitudes) {
+            if (!canvasIds.add(solicitud.canvasId())) {
+                throw new ReglaNegocioException(
+                        "El diagrama contiene dos arcos con el mismo identificador visual: "
+                                + solicitud.canvasId());
+            }
+
+            NodoProceso origen = obtenerNodoPorCanvasId(
+                    solicitud.origenCanvasId(), proceso);
+            NodoProceso destino = obtenerNodoPorCanvasId(
+                    solicitud.destinoCanvasId(), proceso);
+            validarConexion(origen, destino);
+            validarCondicion(origen, solicitud.condicion());
+
+            String conexion = origen.getId() + ":" + destino.getId();
+            if (!conexiones.add(conexion)) {
+                throw new ReglaNegocioException(
+                        "El diagrama contiene arcos duplicados entre "
+                                + origen.getNombre() + " y " + destino.getNombre());
+            }
+
+            Arco arco = arcoRepository.findByProcesoIdAndCanvasId(procesoId, solicitud.canvasId())
+                    .orElseGet(() -> arcoRepository
+                            .findByOrigenIdAndDestinoId(origen.getId(), destino.getId())
+                            .orElseGet(Arco::new));
+            boolean eraNuevoOInactivo = arco.getId() == null || !arco.isActivo();
+
+            arco.setProceso(proceso);
+            arco.setOrigen(origen);
+            arco.setDestino(destino);
+            arco.setEtiqueta(normalizar(solicitud.etiqueta()));
+            arco.setCondicion(normalizar(solicitud.condicion()));
+            arco.setCanvasId(solicitud.canvasId());
+            arco.setActivo(true);
+            arco = arcoRepository.save(arco);
+
+            historialService.registrar("Arco", arco.getId(),
+                    eraNuevoOInactivo ? AccionHistorial.CREACION : AccionHistorial.EDICION,
+                    usuario, proceso,
+                    (eraNuevoOInactivo ? "Arco sincronizado: " : "Arco actualizado: ")
+                            + origen.getNombre() + " -> " + destino.getNombre());
+        }
+
+        List<Arco> eliminados = arcoRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
+                .filter(arco -> arco.getCanvasId() != null && !canvasIds.contains(arco.getCanvasId()))
+                .toList();
+        for (Arco arco : eliminados) {
+            eliminar(arco.getId(), usuarioId);
+        }
+
+        arcoRepository.flush();
+        return arcoRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
+                .map(arco -> modelMapper.map(arco, ArcoResponse.class))
+                .toList();
+    }
+
     /**
      * HU-13. La eliminacion es logica y solo la hace el administrador. No se bloquea
      * cuando deja elementos sueltos, porque un diagrama en borrador puede estar
@@ -203,6 +272,17 @@ public class ArcoService {
                     "El elemento " + nodo.getNombre() + " pertenece a otro proceso");
         }
         return nodo;
+    }
+
+    private NodoProceso obtenerNodoPorCanvasId(String canvasId, Proceso proceso) {
+        return nodoProcesoRepository
+                .findByProcesoIdAndCanvasIdAndActivoTrue(proceso.getId(), canvasId)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe un nodo activo asociado al elemento visual: " + canvasId));
+    }
+
+    private String normalizar(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
     }
 
     private Arco obtenerActivo(Long id) {

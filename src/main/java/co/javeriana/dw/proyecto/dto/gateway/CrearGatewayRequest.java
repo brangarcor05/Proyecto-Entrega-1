@@ -1,7 +1,6 @@
 package co.javeriana.dw.proyecto.dto.gateway;
 
 import co.javeriana.dw.proyecto.entidad.TipoGateway;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -15,7 +14,7 @@ public class CrearGatewayRequest {
 
     private String nombre;
 
-    @NotBlank(message = "El tipo de gateway es obligatorio (EXCLUSIVO, PARALELO, INCLUSIVO)")
+    @NotNull(message = "El tipo de gateway es obligatorio (EXCLUSIVO, PARALELO, INCLUSIVO)")
     private TipoGateway tipo;
 
     private Double posicionX;

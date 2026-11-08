@@ -19,6 +19,7 @@ import co.javeriana.dw.proyecto.dto.arco.ActualizarArcoRequest;
 import co.javeriana.dw.proyecto.dto.arco.ArcoEliminadoResponse;
 import co.javeriana.dw.proyecto.dto.arco.ArcoResponse;
 import co.javeriana.dw.proyecto.dto.arco.CrearArcoRequest;
+import co.javeriana.dw.proyecto.dto.arco.SincronizarArcoRequest;
 import co.javeriana.dw.proyecto.service.ArcoService;
 import jakarta.validation.Valid;
 
@@ -68,6 +69,15 @@ public class ArcoController {
             @RequestParam Long usuarioId) {
 
         return ResponseEntity.ok(arcoService.actualizar(id, request, usuarioId));
+    }
+
+    @PutMapping("/sincronizar")
+    public ResponseEntity<List<ArcoResponse>> sincronizar(
+            @RequestParam Long procesoId,
+            @RequestParam Long usuarioId,
+            @Valid @RequestBody List<@Valid SincronizarArcoRequest> arcos) {
+
+        return ResponseEntity.ok(arcoService.sincronizar(procesoId, arcos, usuarioId));
     }
 
     /**
