@@ -1,5 +1,6 @@
 package co.javeriana.dw.proyecto.controller;
 
+import co.javeriana.dw.proyecto.config.SeguridadConfig;
 import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
 import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
@@ -7,6 +8,8 @@ import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.exception.ManejadorGlobalExcepciones;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
+import co.javeriana.dw.proyecto.security.JwtService;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import co.javeriana.dw.proyecto.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -14,50 +17,61 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Pruebas de HU-02 a nivel HTTP: invitar, cambiar rol, desactivar y listar usuarios.
- * UsuarioService esta mockeado.
+ *
+ * El controlador toma la empresa del usuario autenticado (@AuthenticationPrincipal
+ * UsuarioAutenticado), así que las peticiones se simulan con ese principal, igual que
+ * lo deja el filtro JWT. @WithMockUser no sirve aquí: crea un usuario genérico de
+ * Spring y el controlador recibiría null.
  */
 @WebMvcTest(UsuarioController.class)
-@Import(ManejadorGlobalExcepciones.class)
-@WithMockUser(roles = "ADMIN") 
+@Import({ManejadorGlobalExcepciones.class, SeguridadConfig.class})
 class UsuarioControllerTest {
 
-    @Autowired
-    private WebApplicationContext context;
+    private static final long EMPRESA_ID = 1L;
 
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setup() {
-            mockMvc = MockMvcBuilders
-            .webAppContextSetup(context)
-            .apply(springSecurity())   
-            .build();
-}
-
-   @MockBean
+    @MockBean
     private UsuarioService usuarioService;
+
+    // SeguridadConfig lo necesita para construir el filtro JWT
+    @MockBean
+    private JwtService jwtService;
+
+    /** Simula la petición de un usuario ya autenticado con su access token. */
+    private RequestPostProcessor como(RolUsuario rol) {
+        UsuarioAutenticado usuario = new UsuarioAutenticado(3L, EMPRESA_ID, "u@acme.com", rol);
+        return authentication(new UsernamePasswordAuthenticationToken(
+                usuario, null, List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()))));
+    }
 
     private CrearUsuarioRequest requestValido() {
         CrearUsuarioRequest request = new CrearUsuarioRequest();
@@ -69,6 +83,12 @@ class UsuarioControllerTest {
     }
 
     @Test
+    void sinToken_responde401() throws Exception {
+        mockMvc.perform(get("/api/usuarios"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void invitar_devuelve201_cuandoRequestValido() throws Exception {
         UsuarioResponse response = new UsuarioResponse();
         response.setId(20L);
@@ -77,8 +97,7 @@ class UsuarioControllerTest {
         when(usuarioService.invitarUsuario(any(), any())).thenReturn(response);
 
         mockMvc.perform(post("/api/usuarios")
-                        .with(csrf())
-                        .param("empresaId", "1")
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
                 .andExpect(status().isCreated())
@@ -87,12 +106,29 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void invitar_devuelve400_cuandoFaltaEmpresaId() throws Exception {
+    void invitar_usaLaEmpresaDelToken_eIgnoraLaQueMandeElCliente() throws Exception {
+        when(usuarioService.invitarUsuario(any(), any())).thenReturn(new UsuarioResponse());
+
+        // El cliente intenta crear el usuario en la empresa 2; se crea en la 1 (la del token)
         mockMvc.perform(post("/api/usuarios")
-                        .with(csrf())
+                        .with(como(RolUsuario.ADMIN))
+                        .param("empresaId", "2")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
+
+        verify(usuarioService).invitarUsuario(argThat(empresa -> empresa.getId() == EMPRESA_ID), any());
+    }
+
+    @Test
+    void invitar_editor_responde403_yNoLlegaAlServicio() throws Exception {
+        mockMvc.perform(post("/api/usuarios")
+                        .with(como(RolUsuario.EDITOR))
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(requestValido())))
+                .andExpect(status().isForbidden());
+
+        verify(usuarioService, never()).invitarUsuario(any(), any());
     }
 
     @Test
@@ -101,8 +137,7 @@ class UsuarioControllerTest {
         request.setEmail("no-es-correo");
 
         mockMvc.perform(post("/api/usuarios")
-                        .with(csrf())
-                        .param("empresaId", "1")
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -114,8 +149,7 @@ class UsuarioControllerTest {
         request.setRolUsuario(null);
 
         mockMvc.perform(post("/api/usuarios")
-                        .with(csrf())
-                        .param("empresaId", "1")
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -127,8 +161,7 @@ class UsuarioControllerTest {
                 .thenThrow(new NombreDuplicadoException("El correo ya esta registrado"));
 
         mockMvc.perform(post("/api/usuarios")
-                        .with(csrf())
-                        .param("empresaId", "1")
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestValido())))
                 .andExpect(status().isConflict());
@@ -139,13 +172,13 @@ class UsuarioControllerTest {
         UsuarioResponse response = new UsuarioResponse();
         response.setId(5L);
         response.setRolUsuario(RolUsuario.ADMIN);
-        when(usuarioService.cambiarRolAcceso(eq(5L), any(), any())).thenReturn(response);
+        when(usuarioService.cambiarRolAcceso(eq(5L), eq(EMPRESA_ID), any())).thenReturn(response);
 
         CambiarRolRequest request = new CambiarRolRequest();
         request.setRolUsuario(RolUsuario.ADMIN);
 
         mockMvc.perform(patch("/api/usuarios/5/rol")
-                        .with(csrf())
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -154,14 +187,14 @@ class UsuarioControllerTest {
 
     @Test
     void cambiarRol_devuelve404_cuandoUsuarioNoExiste() throws Exception {
-        when(usuarioService.cambiarRolAcceso(eq(99L), any(), any()))
+        when(usuarioService.cambiarRolAcceso(eq(99L), eq(EMPRESA_ID), any()))
                 .thenThrow(new RecursoNoEncontradoException("Usuario no encontrado"));
 
         CambiarRolRequest request = new CambiarRolRequest();
         request.setRolUsuario(RolUsuario.ADMIN);
 
         mockMvc.perform(patch("/api/usuarios/99/rol")
-                        .with(csrf())
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -169,29 +202,47 @@ class UsuarioControllerTest {
 
     @Test
     void cambiarRol_devuelve400_cuandoFaltaRol() throws Exception {
-        CambiarRolRequest request = new CambiarRolRequest();
-
         mockMvc.perform(patch("/api/usuarios/5/rol")
-                        .with(csrf())
+                        .with(como(RolUsuario.ADMIN))
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(new CambiarRolRequest())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void desactivar_devuelve204() throws Exception {
-        mockMvc.perform(delete("/api/usuarios/7")
-                        .with(csrf()))   
-                .andExpect(status().isNoContent());
+    void cambiarRol_lectura_responde403() throws Exception {
+        CambiarRolRequest request = new CambiarRolRequest();
+        request.setRolUsuario(RolUsuario.ADMIN);
+
+        mockMvc.perform(patch("/api/usuarios/5/rol")
+                        .with(como(RolUsuario.LECTURA))
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(usuarioService, never()).cambiarRolAcceso(anyLong(), anyLong(), any());
     }
+
     @Test
-    void listarPorEmpresa_devuelve200ConLista() throws Exception {
+    void desactivar_devuelve204_conLaEmpresaDelToken() throws Exception {
+        mockMvc.perform(delete("/api/usuarios/7").with(como(RolUsuario.ADMIN)))
+                .andExpect(status().isNoContent());
+
+        verify(usuarioService).desactivar(7L, EMPRESA_ID);
+    }
+
+    @Test
+    void listar_cualquierRol_veSoloLosUsuariosDeSuEmpresa() throws Exception {
         UsuarioResponse u1 = new UsuarioResponse();
         u1.setId(1L);
-        when(usuarioService.listarPorEmpresa(1L)).thenReturn(List.of(u1));
+        when(usuarioService.listarPorEmpresa(EMPRESA_ID)).thenReturn(List.of(u1));
 
-        mockMvc.perform(get("/api/usuarios").param("empresaId", "1"))
+        mockMvc.perform(get("/api/usuarios")
+                        .param("empresaId", "2")
+                        .with(como(RolUsuario.LECTURA)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
+
+        verify(usuarioService).listarPorEmpresa(EMPRESA_ID);
     }
 }
