@@ -1,18 +1,15 @@
 package co.javeriana.dw.proyecto.service;
 
-import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
-import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
 import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
 import co.javeriana.dw.proyecto.entidad.Empresa;
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.entidad.Usuario;
-import co.javeriana.dw.proyecto.exception.CredencialesInvalidasException;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.repository.UsuarioRepository;
-import co.javeriana.dw.proyecto.security.JwtService;
+import co.javeriana.dw.proyecto.security.RefreshTokenService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,9 +41,12 @@ class UsuarioServiceTest {
 
     private UsuarioService usuarioService;
 
-    private ModelMapper modelMapper; 
+    @Mock
+    private ModelMapper modelMapper;
 
-    private JwtService jwtService;
+    // El login (y sus pruebas) se movio a AutenticacionService / AutenticacionServiceTest.
+    @Mock
+    private RefreshTokenService refreshTokenService;
 
     // Uso el encoder real (no un mock) para poder verificar que el hash guardado
     // realmente corresponde a la contrasena en texto plano que se envio.
@@ -54,8 +54,8 @@ class UsuarioServiceTest {
 
     @BeforeEach
     void setUp() {
-        usuarioService = new UsuarioService(usuarioRepository, passwordEncoder, 
-                          modelMapper, jwtService);
+        usuarioService = new UsuarioService(usuarioRepository, passwordEncoder,
+                          modelMapper, refreshTokenService);
     }
 
     private Empresa empresaDePrueba() {
@@ -107,6 +107,15 @@ class UsuarioServiceTest {
         request.setPassword("claveSegura123");
 
         when(usuarioRepository.existsByEmail("ana@acme.com")).thenReturn(false);
+        // ModelMapper esta mockeado: se simula el mapeo request -> entidad
+        when(modelMapper.map(any(CrearUsuarioRequest.class), eq(Usuario.class))).thenAnswer(inv -> {
+            CrearUsuarioRequest r = inv.getArgument(0);
+            Usuario u = new Usuario();
+            u.setNombre(r.getNombre());
+            u.setEmail(r.getEmail());
+            u.setRolUsuario(r.getRolUsuario());
+            return u;
+        });
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> {
             Usuario u = inv.getArgument(0);
             u.setId(20L);
@@ -179,91 +188,19 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void desactivar_marcaActivoFalse() {
+    void desactivar_marcaActivoFalse_yRevocaSusSesiones() {
         Usuario usuario = new Usuario();
         usuario.setId(7L);
         usuario.setActivo(true);
+        usuario.setEmpresa(empresaDePrueba());
         when(usuarioRepository.findById(7L)).thenReturn(Optional.of(usuario));
 
         usuarioService.desactivar(7L, 1L);
 
         assertThat(usuario.isActivo()).isFalse();
         verify(usuarioRepository).save(usuario);
-    }
-
-    @Test
-    void autenticar_devuelveSesion_cuandoCredencialesValidas() {
-        Usuario usuario = new Usuario();
-        usuario.setId(3L);
-        usuario.setEmail("juan@acme.com");
-        usuario.setPasswordHash(passwordEncoder.encode("claveCorrecta"));
-        usuario.setActivo(true);
-        usuario.setEmpresa(empresaDePrueba());
-        when(usuarioRepository.findByEmail("juan@acme.com")).thenReturn(Optional.of(usuario));
-
-        // El mock de JwtService debe devolver un token cuando se le pida
-        when(jwtService.generarToken(any(Usuario.class))).thenReturn("token-falso-de-prueba");
-
-        // El mock de ModelMapper debe devolver una SesionResponse
-        SesionResponse sesionSimulada = new SesionResponse();
-        sesionSimulada.setUsuarioId(3L);
-        sesionSimulada.setEmpresaId(1L);
-        when(modelMapper.map(any(Usuario.class), eq(SesionResponse.class))).thenReturn(sesionSimulada);
-
-        LoginRequest login = new LoginRequest();
-        login.setEmail("juan@acme.com");
-        login.setPassword("claveCorrecta");
-
-        SesionResponse sesion = usuarioService.autenticar(login);
-
-        assertThat(sesion.getUsuarioId()).isEqualTo(3L);
-        assertThat(sesion.getEmpresaId()).isEqualTo(1L);
-        verify(jwtService).generarToken(any(Usuario.class)); // Verificamos que se llamó
-    }
-
-    @Test
-    void autenticar_lanzaCredencialesInvalidas_cuandoCorreoNoExiste() {
-        when(usuarioRepository.findByEmail("nadie@acme.com")).thenReturn(Optional.empty());
-        LoginRequest login = new LoginRequest();
-        login.setEmail("nadie@acme.com");
-        login.setPassword("algo");
-
-        assertThatThrownBy(() -> usuarioService.autenticar(login))
-                .isInstanceOf(CredencialesInvalidasException.class);
-    }
-
-    @Test
-    void autenticar_lanzaCredencialesInvalidas_cuandoPasswordIncorrecta() {
-        Usuario usuario = new Usuario();
-        usuario.setEmail("juan@acme.com");
-        usuario.setPasswordHash(passwordEncoder.encode("claveCorrecta"));
-        usuario.setActivo(true);
-        when(usuarioRepository.findByEmail("juan@acme.com")).thenReturn(Optional.of(usuario));
-
-        LoginRequest login = new LoginRequest();
-        login.setEmail("juan@acme.com");
-        login.setPassword("claveIncorrecta");
-
-        assertThatThrownBy(() -> usuarioService.autenticar(login))
-                .isInstanceOf(CredencialesInvalidasException.class);
-    }
-
-    @Test
-    void autenticar_lanzaCredencialesInvalidas_cuandoUsuarioInactivo() {
-        // HU-02/HU-03: un usuario desactivado no puede iniciar sesion aunque la
-        // contrasena sea correcta.
-        Usuario usuario = new Usuario();
-        usuario.setEmail("juan@acme.com");
-        usuario.setPasswordHash(passwordEncoder.encode("claveCorrecta"));
-        usuario.setActivo(false);
-        when(usuarioRepository.findByEmail("juan@acme.com")).thenReturn(Optional.of(usuario));
-
-        LoginRequest login = new LoginRequest();
-        login.setEmail("juan@acme.com");
-        login.setPassword("claveCorrecta");
-
-        assertThatThrownBy(() -> usuarioService.autenticar(login))
-                .isInstanceOf(CredencialesInvalidasException.class);
+        // Sin esto, el usuario desactivado podria seguir renovando su sesion 7 dias.
+        verify(refreshTokenService).revocarTodos(7L);
     }
 
     @Test

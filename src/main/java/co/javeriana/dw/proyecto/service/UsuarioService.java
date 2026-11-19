@@ -1,18 +1,15 @@
 package co.javeriana.dw.proyecto.service;
 
-import co.javeriana.dw.proyecto.dto.autenticacion.LoginRequest;
-import co.javeriana.dw.proyecto.dto.autenticacion.SesionResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CambiarRolRequest;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
 import co.javeriana.dw.proyecto.dto.usuario.UsuarioResponse;
 import co.javeriana.dw.proyecto.entidad.Empresa;
 import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.entidad.Usuario;
-import co.javeriana.dw.proyecto.exception.CredencialesInvalidasException;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
 import co.javeriana.dw.proyecto.repository.UsuarioRepository;
-import co.javeriana.dw.proyecto.security.JwtService;
+import co.javeriana.dw.proyecto.security.RefreshTokenService;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,14 +23,15 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
+    // El inicio de sesion se movio a AutenticacionService (HU-03, access + refresh token).
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
-                          ModelMapper modelMapper, JwtService jwtService) {
+                          ModelMapper modelMapper, RefreshTokenService refreshTokenService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
-        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -78,17 +76,9 @@ public class UsuarioService {
         Usuario usuario = obtenerDeEmpresa(usuarioId, empresaId);
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
-    }
-
-    public SesionResponse autenticar(LoginRequest request) {
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(CredencialesInvalidasException::new);
-        if (!usuario.isActivo() || !passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
-            throw new CredencialesInvalidasException();
-        }
-        SesionResponse sesion = modelMapper.map(usuario, SesionResponse.class);
-        sesion.setToken(jwtService.generarToken(usuario));
-        return sesion;
+        // Un usuario desactivado no debe poder renovar su sesion: se revocan sus refresh
+        // tokens. Su access token actual deja de servir en cuanto vence (pocos minutos).
+        refreshTokenService.revocarTodos(usuario.getId());
     }
 
     public List<UsuarioResponse> listarPorEmpresa(Long empresaId) {

@@ -15,21 +15,32 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import co.javeriana.dw.proyecto.dto.rolproceso.ActualizarRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.CrearRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.RolProcesoResponse;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import co.javeriana.dw.proyecto.service.RolProcesoService;
 import jakarta.validation.Valid;
 
 /**
  * Roles de proceso (HU-17 a HU-20).
  *
- * Mientras no exista el inicio de sesion (HU-03), usuarioId/empresaId llegan como
- * parametros de la peticion. Cuando el login este listo deben salir del usuario
- * autenticado.
+ * La empresa y el usuario salen SIEMPRE del access token (@AuthenticationPrincipal), nunca
+ * de un parametro que el cliente pueda cambiar. Asi un usuario solo ve y modifica el
+ * catalogo de su propia empresa (HU-20: "solo aparecen los roles de la empresa del
+ * usuario autenticado").
+ *
+ * Permisos:
+ *  - Consultar (GET): cualquier usuario autenticado (ADMIN, EDITOR, LECTURA). Todos
+ *    necesitan el catalogo para ver y nombrar lanes.
+ *  - Crear, editar, eliminar: solo ADMIN (HU-17 y HU-19). @PreAuthorize corta la peticion
+ *    con 403 antes de llegar al servicio; el servicio vuelve a comprobar el rol contra la
+ *    base de datos por si cambio despues de emitirse el token.
  */
 @RestController
 @RequestMapping("/api/roles-proceso")
@@ -41,30 +52,32 @@ public class RolProcesoController {
         this.rolProcesoService = rolProcesoService;
     }
 
-    /** HU-20: búsqueda por nombre, paginada, solo de la empresa indicada. */
+    /** HU-20: busqueda por nombre, paginada, solo de la empresa del usuario autenticado. */
     @GetMapping
     public ResponseEntity<Page<RolProcesoResponse>> consultar(
-            @RequestParam Long empresaId,
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @RequestParam(required = false) String nombre,
             @PageableDefault(size = 10, sort = "nombre", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        return ResponseEntity.ok(rolProcesoService.consultar(empresaId, nombre, pageable));
+        return ResponseEntity.ok(rolProcesoService.consultar(actor.empresaId(), nombre, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RolProcesoResponse> buscarPorId(
-            @PathVariable Long id,
-            @RequestParam Long empresaId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
 
-        return ResponseEntity.ok(rolProcesoService.obtener(id, empresaId));
+        return ResponseEntity.ok(rolProcesoService.obtener(id, actor.empresaId()));
     }
 
+    /** HU-17: solo el administrador. El rol queda en la empresa del administrador. */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RolProcesoResponse> crear(
-            @Valid @RequestBody CrearRolProcesoRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @Valid @RequestBody CrearRolProcesoRequest request) {
 
-        RolProcesoResponse creado = rolProcesoService.crear(request, usuarioId);
+        RolProcesoResponse creado = rolProcesoService.crear(request, actor.id());
         URI ubicacion = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(creado.id())
@@ -72,18 +85,25 @@ public class RolProcesoController {
         return ResponseEntity.created(ubicacion).body(creado);
     }
 
+    /** HU-18. */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RolProcesoResponse> actualizar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @PathVariable Long id,
-            @Valid @RequestBody ActualizarRolProcesoRequest request,
-            @RequestParam Long usuarioId) {
+            @Valid @RequestBody ActualizarRolProcesoRequest request) {
 
-        return ResponseEntity.ok(rolProcesoService.actualizar(id, request, usuarioId));
+        return ResponseEntity.ok(rolProcesoService.actualizar(id, request, actor.id()));
     }
 
+    /** HU-19: eliminacion logica, bloqueada si el rol esta en uso. */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
-        rolProcesoService.eliminar(id, usuarioId);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+
+        rolProcesoService.eliminar(id, actor.id());
         return ResponseEntity.noContent().build();
     }
 }

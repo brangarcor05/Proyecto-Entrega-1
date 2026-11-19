@@ -57,12 +57,9 @@ public class RolProcesoService {
     @Transactional
     public RolProcesoResponse crear(CrearRolProcesoRequest request, Long usuarioId) {
         Usuario usuario = permisoService.validarEsAdministrador(usuarioId);
-        if (!usuario.getEmpresa().getId().equals(request.empresaId())) {
-            throw new PermisoDenegadoException(
-                    "No se pueden crear roles para una empresa distinta a la del usuario");
-        }
-        Empresa empresa = empresaRepository.findById(request.empresaId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("No existe la empresa " + request.empresaId()));
+        // La empresa es la del administrador que crea el rol (el usuarioId viene del
+        // token), asi que no hay forma de crear roles en otra empresa.
+        Empresa empresa = usuario.getEmpresa();
 
         if (rolProcesoRepository.existsByNombreIgnoreCaseAndEmpresaId(request.nombre(), empresa.getId())) {
             throw new NombreDuplicadoException(
@@ -133,8 +130,6 @@ public class RolProcesoService {
                 : rolProcesoRepository.findByEmpresaIdAndActivoTrueAndNombreContainingIgnoreCase(
                         empresaId, nombre, pageable);
 
-        // N+1 a propósito: el catálogo de roles de una empresa es chico (decenas, no
-        // miles), así que no compensa complicar la consulta con una agregación batch.
         return pagina.map(rol -> modelMapper.map(rol, RolProcesoResponse.class)
                 .conUso(procesosDondeSeUsa(rol.getId())));
     }
