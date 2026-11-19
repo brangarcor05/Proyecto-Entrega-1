@@ -24,14 +24,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         
-        // 1. NUEVO: Si la ruta es el login o el registro de empresa, no validamos token
-        String path = request.getRequestURI();
-        if (path.equals("/api/auth/login") || path.equals("/api/empresas")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        // 2. Si hay un token en el header, lo validamos
+        // Si hay un access token en la cabecera y es valido, se autentica la peticion.
+        // Las rutas publicas (login, refresh, logout, registro de empresa) se declaran en
+        // SeguridadConfig con permitAll: aqui no se salta ninguna ruta, porque saltarse
+        // "/api/empresas" dejaba sin autenticar tambien el GET que usa HU-23.
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             jwtService.validar(header.substring(7)).ifPresent(usuario -> {
@@ -42,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             });
         }
         
-        // 3. Continuamos con la cadena de filtros
         chain.doFilter(request, response);
     }
 }

@@ -50,6 +50,13 @@ public class ManejadorGlobalExcepciones {
                 .body(ErrorResponse.de(401, "No autorizado", ex.getMessage()));
     }
 
+    @ExceptionHandler(SesionInvalidaException.class)
+    public ResponseEntity<ErrorResponse> manejarSesionInvalida(SesionInvalidaException ex) {
+        // Refresh token vencido, revocado o desconocido: el frontend debe volver al login.
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.de(401, "Sesion invalida", ex.getMessage()));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> manejarArgumentoInvalido(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

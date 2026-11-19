@@ -33,12 +33,16 @@ public class SeguridadConfig {
    @Bean
 public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService) throws Exception {
     http
-        .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <-- FORZAR CORS
+        .cors(cors -> cors.configurationSource(corsConfigurationSource())) //FORZAR CORS
         .csrf(csrf -> csrf.disable())
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(a -> a
-            .requestMatchers(HttpMethod.POST, "/api/empresas", "/api/auth/login").permitAll()
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <-- IMPORTANTE: Permitir preflight
+            // Registro de empresa (HU-01) y los tres endpoints de sesion (HU-03)
+            .requestMatchers(HttpMethod.POST, "/api/empresas",
+                    "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+            // Documentacion de la API (Swagger / OpenAPI)
+            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() //IMPORTANTE: Permitir preflight
             .anyRequest().authenticated())
         .exceptionHandling(e -> e.authenticationEntryPoint(
             new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

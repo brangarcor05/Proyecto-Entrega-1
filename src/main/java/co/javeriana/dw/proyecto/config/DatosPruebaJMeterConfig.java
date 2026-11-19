@@ -117,10 +117,10 @@ public class DatosPruebaJMeterConfig {
                     administradorId);
 
             RolProcesoResponse solicitante = rolProcesoService.crear(
-                    new CrearRolProcesoRequest(empresa.getId(), "Solicitante", "Crea la solicitud de compra"),
+                    new CrearRolProcesoRequest("Solicitante", "Crea la solicitud de compra"),
                     administradorId);
             RolProcesoResponse aprobador = rolProcesoService.crear(
-                    new CrearRolProcesoRequest(empresa.getId(), "Aprobador", "Revisa y aprueba la solicitud"),
+                    new CrearRolProcesoRequest("Aprobador", "Revisa y aprueba la solicitud"),
                     administradorId);
 
             laneService.crear(new CrearLaneRequest(poolPropietario.id(), solicitante.id()), administradorId);

@@ -128,7 +128,7 @@ class RolProcesoLaneReglasTest {
     void soloElAdministradorCreaRoles() {
         assertThrows(PermisoDenegadoException.class,
                 () -> rolProcesoService.crear(
-                        new CrearRolProcesoRequest(empresa.getId(), "Analista", null), editor.getId()),
+                        new CrearRolProcesoRequest("Analista", null), editor.getId()),
                 "El editor no deberia poder crear roles de proceso");
     }
 
@@ -359,7 +359,7 @@ class RolProcesoLaneReglasTest {
 
     private RolProcesoResponse crearRol(String nombre, String descripcion) {
         return rolProcesoService.crear(
-                new CrearRolProcesoRequest(empresa.getId(), nombre, descripcion), admin.getId());
+                new CrearRolProcesoRequest(nombre, descripcion), admin.getId());
     }
 
     private LaneResponse crearLane(Long poolId, Long rolProcesoId) {
