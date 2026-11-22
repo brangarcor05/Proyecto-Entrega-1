@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +20,15 @@ import co.javeriana.dw.proyecto.dto.pool.ActualizarPoolRequest;
 import co.javeriana.dw.proyecto.dto.pool.CrearPoolRequest;
 import co.javeriana.dw.proyecto.dto.pool.PoolResponse;
 import co.javeriana.dw.proyecto.service.PoolService;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import jakarta.validation.Valid;
 
 /**
  * Pools del diagrama (HU-21).
  *
- * Mientras no exista el inicio de sesion (HU-03), usuarioId llega como parametro de
- * la peticion. Cuando el login este listo debe salir del usuario autenticado.
+ * El usuario y la empresa salen del access token (@AuthenticationPrincipal), nunca de
+ * un parametro que el cliente pueda cambiar. Las lecturas exigen que la empresa del
+ * token sea la propietaria del proceso o una invitada (HU-23).
  */
 @RestController
 @RequestMapping("/api/pools")
@@ -38,21 +41,25 @@ public class PoolController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PoolResponse>> listarPorProceso(@RequestParam Long procesoId) {
-        return ResponseEntity.ok(poolService.listarPorProceso(procesoId));
+    public ResponseEntity<List<PoolResponse>> listarPorProceso(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @RequestParam Long procesoId) {
+        return ResponseEntity.ok(poolService.listarPorProceso(procesoId, actor.empresaId()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PoolResponse> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(poolService.obtener(id));
+    public ResponseEntity<PoolResponse> buscarPorId(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(poolService.obtener(id, actor.empresaId()));
     }
 
     @PostMapping
     public ResponseEntity<PoolResponse> crear(
-            @Valid @RequestBody CrearPoolRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @Valid @RequestBody CrearPoolRequest request) {
 
-        PoolResponse poolCreado = poolService.crear(request, usuarioId);
+        PoolResponse poolCreado = poolService.crear(request, actor.id());
         URI ubicacion = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(poolCreado.id())
@@ -64,14 +71,16 @@ public class PoolController {
     public ResponseEntity<PoolResponse> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody ActualizarPoolRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor) {
 
-        return ResponseEntity.ok(poolService.actualizar(id, request, usuarioId));
+        return ResponseEntity.ok(poolService.actualizar(id, request, actor.id()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
-        poolService.eliminar(id, usuarioId);
+    public ResponseEntity<Void> eliminar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+        poolService.eliminar(id, actor.id());
         return ResponseEntity.noContent().build();
     }
 }

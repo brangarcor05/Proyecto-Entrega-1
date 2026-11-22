@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import co.javeriana.dw.proyecto.dto.historial.HistorialResponse;
@@ -25,13 +26,16 @@ import co.javeriana.dw.proyecto.dto.proceso.CompartirProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.CrearProcesoRequest;
 import co.javeriana.dw.proyecto.dto.proceso.ProcesoResponse;
 import co.javeriana.dw.proyecto.entidad.EstadoProceso;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import co.javeriana.dw.proyecto.service.ProcesoService;
 import jakarta.validation.Valid;
 
 /**
- * Mientras no exista el inicio de sesion (HU-03), empresaId y usuarioId llegan como
- * parametros de la peticion. Cuando el login este listo deben salir del usuario
- * autenticado y desaparecer de la firma de estos metodos.
+ * Procesos (HU-04 a HU-07 y HU-23).
+ *
+ * El usuario y la empresa salen SIEMPRE del access token (@AuthenticationPrincipal),
+ * nunca de un parametro que el cliente pueda cambiar. Si un cliente antiguo todavia
+ * manda empresaId o usuarioId en la URL, se ignoran.
  */
 @RestController
 @RequestMapping("/api/procesos")
@@ -46,7 +50,7 @@ public class ProcesoController {
     /** HU-07 y HU-23: los procesos de la empresa mas los que le compartieron. */
     @GetMapping
     public ResponseEntity<Page<ProcesoResponse>> consultar(
-            @RequestParam Long empresaId,
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) EstadoProceso estado,
             @RequestParam(required = false) String categoria,
@@ -54,32 +58,32 @@ public class ProcesoController {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
         return ResponseEntity.ok(procesoService.consultar(
-                empresaId, nombre, estado, categoria, incluirInactivos, pageable));
+                actor.empresaId(), nombre, estado, categoria, incluirInactivos, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProcesoResponse> buscarPorId(
-            @PathVariable Long id,
-            @RequestParam Long empresaId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
 
-        return ResponseEntity.ok(procesoService.obtener(id, empresaId));
+        return ResponseEntity.ok(procesoService.obtener(id, actor.empresaId()));
     }
 
     /** HU-07: "Se puede consultar el historial de cambios del proceso". */
     @GetMapping("/{id}/historial")
     public ResponseEntity<List<HistorialResponse>> consultarHistorial(
-            @PathVariable Long id,
-            @RequestParam Long empresaId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
 
-        return ResponseEntity.ok(procesoService.consultarHistorial(id, empresaId));
+        return ResponseEntity.ok(procesoService.consultarHistorial(id, actor.empresaId()));
     }
 
     @PostMapping
     public ResponseEntity<ProcesoResponse> crear(
-            @Valid @RequestBody CrearProcesoRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @Valid @RequestBody CrearProcesoRequest request) {
 
-        ProcesoResponse procesoCreado = procesoService.crear(request, usuarioId);
+        ProcesoResponse procesoCreado = procesoService.crear(request, actor.id());
         URI ubicacion = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(procesoCreado.id())
@@ -89,36 +93,38 @@ public class ProcesoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProcesoResponse> actualizar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @PathVariable Long id,
-            @Valid @RequestBody ActualizarProcesoRequest request,
-            @RequestParam Long usuarioId) {
+            @Valid @RequestBody ActualizarProcesoRequest request) {
 
-        return ResponseEntity.ok(procesoService.actualizar(id, request, usuarioId));
+        return ResponseEntity.ok(procesoService.actualizar(id, request, actor.id()));
     }
 
     /** HU-23: define que otras empresas pueden consultar el proceso, en solo lectura. */
     @PutMapping("/{id}/comparticion")
     public ResponseEntity<ProcesoResponse> compartir(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @PathVariable Long id,
-            @Valid @RequestBody CompartirProcesoRequest request,
-            @RequestParam Long usuarioId) {
+            @Valid @RequestBody CompartirProcesoRequest request) {
 
-        return ResponseEntity.ok(procesoService.compartir(id, request, usuarioId));
+        return ResponseEntity.ok(procesoService.compartir(id, request, actor.id()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
-        procesoService.eliminar(id, usuarioId);
+    public ResponseEntity<Void> eliminar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+        procesoService.eliminar(id, actor.id());
         return ResponseEntity.noContent().build();
     }
-        // --- NUEVOS ENDPOINTS PARA EL DIAGRAMA BPMN ---
+    // --- Diagrama BPMN (XML) ---
 
     @GetMapping("/{id}/diagrama")
     public ResponseEntity<String> obtenerDiagrama(
-            @PathVariable Long id,
-            @RequestParam Long empresaId) {
-        
-        String xml = procesoService.obtenerDiagrama(id, empresaId);
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+
+        String xml = procesoService.obtenerDiagrama(id, actor.empresaId());
         return ResponseEntity.ok()
                 .header("Content-Type", "text/plain; charset=UTF-8")
                 .body(xml);
@@ -126,11 +132,11 @@ public class ProcesoController {
 
     @PutMapping(value = "/{id}/diagrama", consumes = "text/plain")
     public ResponseEntity<Void> guardarDiagrama(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
             @PathVariable Long id,
-            @RequestBody String xml,
-            @RequestParam Long usuarioId) {
-        
-        procesoService.guardarDiagrama(id, xml, usuarioId);
+            @RequestBody String xml) {
+
+        procesoService.guardarDiagrama(id, xml, actor.id());
         return ResponseEntity.noContent().build();
     }
 }

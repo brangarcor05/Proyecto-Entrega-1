@@ -37,11 +37,13 @@ public class PoolService {
     private final PermisoService permisoService;
     private final HistorialService historialService;
     private final ModelMapper modelMapper;
+    private final AccesoProcesoService accesoProcesoService;
 
     public PoolService(PoolRepository poolRepository, ProcesoRepository procesoRepository,
                        LaneRepository laneRepository, NodoProcesoRepository nodoProcesoRepository,
                        PermisoService permisoService, HistorialService historialService,
-                          ModelMapper modelMapper) {
+                          ModelMapper modelMapper,
+            AccesoProcesoService accesoProcesoService) {
         this.poolRepository = poolRepository;
         this.procesoRepository = procesoRepository;
         this.laneRepository = laneRepository;
@@ -49,6 +51,7 @@ public class PoolService {
         this.permisoService = permisoService;
         this.historialService = historialService;
         this.modelMapper = modelMapper;
+        this.accesoProcesoService = accesoProcesoService;
     }
 
     /**
@@ -99,6 +102,20 @@ public class PoolService {
         historialService.registrar("Pool", pool.getId(), AccionHistorial.EDICION,
                 usuario, pool.getProceso(), "Pool actualizado: " + pool.getNombre());
         return modelMapper.map(pool, PoolResponse.class);
+    }
+
+    /** Lectura aislada por empresa: propietaria o invitada (HU-23); si no, 404. */
+    @Transactional(readOnly = true)
+    public PoolResponse obtener(Long poolId, Long empresaId) {
+        Pool pool = obtenerActivo(poolId);
+        accesoProcesoService.validarLectura(pool.getProceso().getId(), empresaId);
+        return modelMapper.map(pool, PoolResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PoolResponse> listarPorProceso(Long procesoId, Long empresaId) {
+        accesoProcesoService.validarLectura(procesoId, empresaId);
+        return listarPorProceso(procesoId);
     }
 
     @Transactional(readOnly = true)

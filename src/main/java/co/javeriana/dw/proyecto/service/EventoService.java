@@ -37,16 +37,19 @@ public class EventoService {
     private final PermisoService permisoService;
     private final HistorialService historialService;
     private final ModelMapper modelMapper;
+    private final AccesoProcesoService accesoProcesoService;
 
     public EventoService(EventoRepository eventoRepository, ProcesoRepository procesoRepository,
                          PoolRepository poolRepository, PermisoService permisoService,
-                         HistorialService historialService, ModelMapper modelMapper) {
+                         HistorialService historialService, ModelMapper modelMapper,
+            AccesoProcesoService accesoProcesoService) {
         this.eventoRepository = eventoRepository;
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
         this.modelMapper = modelMapper;
+        this.accesoProcesoService = accesoProcesoService;
     }
 
     @Transactional
@@ -89,6 +92,20 @@ public class EventoService {
         historialService.registrar("Evento", evento.getId(), AccionHistorial.EDICION,
                 usuario, evento.getProceso(), "Evento actualizado: " + evento.getNombre());
         return modelMapper.map(evento, EventoResponse.class);
+    }
+
+    /** Lectura aislada por empresa: propietaria o invitada (HU-23); si no, 404. */
+    @Transactional(readOnly = true)
+    public EventoResponse obtener(Long eventoId, Long empresaId) {
+        Evento evento = obtenerActivo(eventoId);
+        accesoProcesoService.validarLectura(evento.getProceso().getId(), empresaId);
+        return modelMapper.map(evento, EventoResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventoResponse> listarPorProceso(Long procesoId, Long empresaId) {
+        accesoProcesoService.validarLectura(procesoId, empresaId);
+        return listarPorProceso(procesoId);
     }
 
     @Transactional(readOnly = true)

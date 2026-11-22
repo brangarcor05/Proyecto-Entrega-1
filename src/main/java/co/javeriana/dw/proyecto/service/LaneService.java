@@ -46,11 +46,13 @@ public class LaneService {
     private final PermisoService permisoService;
     private final HistorialService historialService;
     private final ModelMapper modelMapper;
+    private final AccesoProcesoService accesoProcesoService;
 
     public LaneService(LaneRepository laneRepository, PoolRepository poolRepository,
                        RolProcesoRepository rolProcesoRepository, ProcesoRepository procesoRepository,
                        ActividadRepository actividadRepository, PermisoService permisoService,
-                       HistorialService historialService, ModelMapper modelMapper) {
+                       HistorialService historialService, ModelMapper modelMapper,
+            AccesoProcesoService accesoProcesoService) {
         this.laneRepository = laneRepository;
         this.poolRepository = poolRepository;
         this.rolProcesoRepository = rolProcesoRepository;
@@ -59,6 +61,7 @@ public class LaneService {
         this.permisoService = permisoService;
         this.historialService = historialService;
         this.modelMapper = modelMapper;
+        this.accesoProcesoService = accesoProcesoService;
     }
 
     @Transactional
@@ -153,6 +156,14 @@ public class LaneService {
         return actualizadas.stream()
                 .map(lane -> modelMapper.map(lane, LaneResponse.class))
                 .toList();
+    }
+
+    /** Lectura aislada por empresa: propietaria o invitada (HU-23); si no, 404. */
+    @Transactional(readOnly = true)
+    public List<LaneResponse> listarPorPool(Long poolId, Long empresaId) {
+        Pool pool = obtenerPoolActivo(poolId);
+        accesoProcesoService.validarLectura(pool.getProceso().getId(), empresaId);
+        return listarPorPool(poolId);
     }
 
     @Transactional(readOnly = true)
