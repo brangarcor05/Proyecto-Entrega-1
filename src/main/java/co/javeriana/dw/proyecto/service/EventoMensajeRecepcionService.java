@@ -3,53 +3,62 @@ package co.javeriana.dw.proyecto.service;
 import co.javeriana.dw.proyecto.dto.mensaje.ActualizarEventoMensajeRecepcionRequest;
 import co.javeriana.dw.proyecto.dto.mensaje.CrearEventoMensajeRecepcionRequest;
 import co.javeriana.dw.proyecto.dto.mensaje.EventoMensajeRecepcionResponse;
+import co.javeriana.dw.proyecto.entidad.AccionHistorial;
 import co.javeriana.dw.proyecto.entidad.EventoMensajeRecepcion;
 import co.javeriana.dw.proyecto.entidad.Pool;
 import co.javeriana.dw.proyecto.entidad.Proceso;
+import co.javeriana.dw.proyecto.entidad.Usuario;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
+import co.javeriana.dw.proyecto.exception.ReglaNegocioException;
 import co.javeriana.dw.proyecto.repository.EventoMensajeRecepcionRepository;
-import co.javeriana.dw.proyecto.repository.PoolRepository;
-import co.javeriana.dw.proyecto.repository.ProcesoRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Message Catch (HU-27) con su clave de correlacion (HU-28).
+ *
+ * - Crear y editar: administrador o editor. Eliminar: solo administrador.
+ * - Solo la empresa propietaria modifica el proceso; las invitadas solo consultan.
+ * - Cada cambio queda en el historial.
+ */
 @Service
 public class EventoMensajeRecepcionService {
 
+    private static final String ENTIDAD = "MensajeRecepcion";
+
     private final EventoMensajeRecepcionRepository eventoMensajeRecepcionRepository;
-    private final ProcesoRepository procesoRepository;
-    private final PoolRepository poolRepository;
+    private final PermisoService permisoService;
+    private final AccesoProcesoService accesoProcesoService;
+    private final HistorialService historialService;
     private final ModelMapper modelMapper;
 
     public EventoMensajeRecepcionService(EventoMensajeRecepcionRepository eventoMensajeRecepcionRepository,
-            ProcesoRepository procesoRepository, PoolRepository poolRepository, ModelMapper modelMapper) {
+            PermisoService permisoService, AccesoProcesoService accesoProcesoService,
+            HistorialService historialService, ModelMapper modelMapper) {
         this.eventoMensajeRecepcionRepository = eventoMensajeRecepcionRepository;
-        this.procesoRepository = procesoRepository;
-        this.poolRepository = poolRepository;
+        this.permisoService = permisoService;
+        this.accesoProcesoService = accesoProcesoService;
+        this.historialService = historialService;
         this.modelMapper = modelMapper;
     }
 
     @Transactional
-    public EventoMensajeRecepcionResponse crear(CrearEventoMensajeRecepcionRequest request) {
-        Proceso proceso = procesoRepository.findById(request.getProcesoId())
-                .orElseThrow(
-                        () -> new RecursoNoEncontradoException("Proceso no encontrado: " + request.getProcesoId()));
-
-        Pool pool = poolRepository.findById(request.getPoolId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Pool no encontrado: " + request.getPoolId()));
+    public EventoMensajeRecepcionResponse crear(CrearEventoMensajeRecepcionRequest request, Long usuarioId) {
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
+        Proceso proceso = accesoProcesoService.obtenerProcesoActivo(request.getProcesoId());
+        accesoProcesoService.validarEscritura(usuario, proceso);
+        Pool pool = obtenerPoolReceptor(request.getPoolId(), proceso);
 
         EventoMensajeRecepcion evento = modelMapper.map(request, EventoMensajeRecepcion.class);
+        evento.setId(null);
         evento.setProceso(proceso);
-        evento.setPool(pool); // 👈 AGREGADO
+        evento.setPool(pool);
         evento.setCanvasId(request.getCanvasId());
         evento.setActivo(true);
-
-        // 👇 ESTO ARREGLA EL ERROR DEL NOMBRE NULL 👇
-        evento.setNombre(request.getNombreMensaje());
+        evento.setNombreMensaje(request.getNombreMensaje().trim());
+        evento.setNombre(evento.getNombreMensaje());
 
         if (evento.getPosicionX() == null)
             evento.setPosicionX(0.0);
@@ -57,58 +66,86 @@ public class EventoMensajeRecepcionService {
             evento.setPosicionY(0.0);
 
         evento = eventoMensajeRecepcionRepository.save(evento);
+
+        historialService.registrar(ENTIDAD, evento.getId(), AccionHistorial.CREACION, usuario, proceso,
+                "Recepcion de mensaje creada: '" + evento.getNombreMensaje() + "' en " + pool.getNombre());
         return mapearAResponse(evento);
     }
 
-    public EventoMensajeRecepcionResponse obtenerPorId(Long id) {
-        EventoMensajeRecepcion evento = eventoMensajeRecepcionRepository.findById(id)
-                .orElseThrow(
-                        () -> new RecursoNoEncontradoException("Evento de mensaje recepción no encontrado: " + id));
+    @Transactional(readOnly = true)
+    public EventoMensajeRecepcionResponse obtenerPorId(Long id, Long empresaId) {
+        EventoMensajeRecepcion evento = obtenerActivo(id);
+        accesoProcesoService.validarLectura(evento.getProceso().getId(), empresaId);
         return mapearAResponse(evento);
     }
 
-    public List<EventoMensajeRecepcionResponse> listarPorProceso(Long procesoId) {
+    @Transactional(readOnly = true)
+    public List<EventoMensajeRecepcionResponse> listarPorProceso(Long procesoId, Long empresaId) {
+        accesoProcesoService.validarLectura(procesoId, empresaId);
         return eventoMensajeRecepcionRepository.findByProcesoIdAndActivoTrue(procesoId).stream()
                 .map(this::mapearAResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
-    public EventoMensajeRecepcionResponse actualizar(Long id, ActualizarEventoMensajeRecepcionRequest request) {
-        EventoMensajeRecepcion evento = eventoMensajeRecepcionRepository.findById(id)
-                .orElseThrow(
-                        () -> new RecursoNoEncontradoException("Evento de mensaje recepción no encontrado: " + id));
+    public EventoMensajeRecepcionResponse actualizar(Long id, ActualizarEventoMensajeRecepcionRequest request,
+            Long usuarioId) {
+        Usuario usuario = permisoService.validarPuedeEditar(usuarioId);
+        EventoMensajeRecepcion evento = obtenerActivo(id);
+        Proceso proceso = evento.getProceso();
+        accesoProcesoService.validarEscritura(usuario, proceso);
 
         if (request.getPoolId() != null) {
-            Pool pool = poolRepository.findById(request.getPoolId())
-                    .orElseThrow(() -> new RecursoNoEncontradoException("Pool no encontrado: " + request.getPoolId()));
-            evento.setPool(pool);
+            evento.setPool(obtenerPoolReceptor(request.getPoolId(), proceso));
         }
 
-        evento.setNombre(request.getNombreMensaje());
-        evento.setNombreMensaje(request.getNombreMensaje());
+        evento.setNombreMensaje(request.getNombreMensaje().trim());
+        evento.setNombre(evento.getNombreMensaje());
         evento.setVariante(request.getVariante());
         evento.setDatosEsperados(request.getDatosEsperados());
         evento.setOrigenExterno(request.isOrigenExterno());
         evento.setClaveCorrelacion(request.getClaveCorrelacion());
-        evento.setCanvasId(request.getCanvasId());
-
+        if (request.getCanvasId() != null)
+            evento.setCanvasId(request.getCanvasId());
         if (request.getPosicionX() != null)
             evento.setPosicionX(request.getPosicionX());
         if (request.getPosicionY() != null)
             evento.setPosicionY(request.getPosicionY());
 
         evento = eventoMensajeRecepcionRepository.save(evento);
+
+        historialService.registrar(ENTIDAD, evento.getId(), AccionHistorial.EDICION, usuario, proceso,
+                "Recepcion de mensaje actualizada: " + evento.getNombreMensaje());
         return mapearAResponse(evento);
     }
 
     @Transactional
-    public void eliminar(Long id) {
-        EventoMensajeRecepcion evento = eventoMensajeRecepcionRepository.findById(id)
-                .orElseThrow(
-                        () -> new RecursoNoEncontradoException("Evento de mensaje recepción no encontrado: " + id));
+    public void eliminar(Long id, Long usuarioId) {
+        Usuario usuario = permisoService.validarEsAdministrador(usuarioId);
+        EventoMensajeRecepcion evento = obtenerActivo(id);
+        accesoProcesoService.validarEscritura(usuario, evento.getProceso());
+
         evento.setActivo(false);
         eventoMensajeRecepcionRepository.save(evento);
+
+        historialService.registrar(ENTIDAD, evento.getId(), AccionHistorial.ELIMINACION, usuario,
+                evento.getProceso(), "Recepcion de mensaje marcada como inactiva: " + evento.getNombreMensaje());
+    }
+
+    private EventoMensajeRecepcion obtenerActivo(Long id) {
+        return eventoMensajeRecepcionRepository.findById(id)
+                .filter(EventoMensajeRecepcion::isActivo)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Evento de mensaje recepción no encontrado: " + id));
+    }
+
+    /** El catch vive dentro de un pool modelado: un pool caja negra no tiene elementos. */
+    private Pool obtenerPoolReceptor(Long poolId, Proceso proceso) {
+        Pool pool = accesoProcesoService.obtenerPoolDelProceso(poolId, proceso);
+        if (pool.isCajaNegra()) {
+            throw new ReglaNegocioException("Un pool caja negra no puede contener eventos de recepción");
+        }
+        return pool;
     }
 
     private EventoMensajeRecepcionResponse mapearAResponse(EventoMensajeRecepcion evento) {

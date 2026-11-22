@@ -59,9 +59,9 @@ public class ProcesoService {
     public ProcesoResponse crear(CrearProcesoRequest request, Long usuarioId) {
         Usuario usuarioCreador = permisoService.validarPuedeEditar(usuarioId);
 
-        Empresa empresa = empresaRepository.findById(request.empresaId())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe la empresa " + request.empresaId()));
+        // El proceso pertenece a la empresa del usuario autenticado. Se ignora cualquier
+        // empresaId que mande el cliente: asi nadie crea procesos en otra organizacion.
+        Empresa empresa = usuarioCreador.getEmpresa();
 
         if (procesoRepository.existsByNombreAndEmpresaId(request.nombre(), empresa.getId())) {
             throw new NombreDuplicadoException(

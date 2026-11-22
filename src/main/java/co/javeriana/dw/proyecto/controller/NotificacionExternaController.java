@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +20,15 @@ import co.javeriana.dw.proyecto.dto.notificacionexterna.ActualizarNotificacionEx
 import co.javeriana.dw.proyecto.dto.notificacionexterna.CrearNotificacionExternaRequest;
 import co.javeriana.dw.proyecto.dto.notificacionexterna.NotificacionExternaResponse;
 import co.javeriana.dw.proyecto.service.NotificacionExternaService;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import jakarta.validation.Valid;
 
 /**
  * Notificaciones hacia sistemas externos.
  *
- * Mientras no exista el inicio de sesion (HU-03), usuarioId llega como parametro de
- * la peticion. Cuando el login este listo debe salir del usuario autenticado.
+ * El usuario y la empresa salen del access token (@AuthenticationPrincipal), nunca de
+ * un parametro que el cliente pueda cambiar. Las lecturas exigen que la empresa del
+ * token sea la propietaria del proceso o una invitada (HU-23).
  */
 @RestController
 @RequestMapping("/api/notificaciones-externas")
@@ -38,21 +41,25 @@ public class NotificacionExternaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificacionExternaResponse>> listarPorProceso(@RequestParam Long procesoId) {
-        return ResponseEntity.ok(notificacionExternaService.listarPorProceso(procesoId));
+    public ResponseEntity<List<NotificacionExternaResponse>> listarPorProceso(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @RequestParam Long procesoId) {
+        return ResponseEntity.ok(notificacionExternaService.listarPorProceso(procesoId, actor.empresaId()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NotificacionExternaResponse> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(notificacionExternaService.obtener(id));
+    public ResponseEntity<NotificacionExternaResponse> buscarPorId(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(notificacionExternaService.obtener(id, actor.empresaId()));
     }
 
     @PostMapping
     public ResponseEntity<NotificacionExternaResponse> crear(
-            @Valid @RequestBody CrearNotificacionExternaRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @Valid @RequestBody CrearNotificacionExternaRequest request) {
 
-        NotificacionExternaResponse creada = notificacionExternaService.crear(request, usuarioId);
+        NotificacionExternaResponse creada = notificacionExternaService.crear(request, actor.id());
         URI ubicacion = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(creada.id())
@@ -64,14 +71,16 @@ public class NotificacionExternaController {
     public ResponseEntity<NotificacionExternaResponse> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody ActualizarNotificacionExternaRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal UsuarioAutenticado actor) {
 
-        return ResponseEntity.ok(notificacionExternaService.actualizar(id, request, usuarioId));
+        return ResponseEntity.ok(notificacionExternaService.actualizar(id, request, actor.id()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id, @RequestParam Long usuarioId) {
-        notificacionExternaService.eliminar(id, usuarioId);
+    public ResponseEntity<Void> eliminar(
+            @AuthenticationPrincipal UsuarioAutenticado actor,
+            @PathVariable Long id) {
+        notificacionExternaService.eliminar(id, actor.id());
         return ResponseEntity.noContent().build();
     }
 }

@@ -42,17 +42,20 @@ public class ArcoService {
     private final PermisoService permisoService;
     private final HistorialService historialService;
     private final ModelMapper modelMapper;
+    private final AccesoProcesoService accesoProcesoService;
 
     public ArcoService(ArcoRepository arcoRepository, NodoProcesoRepository nodoProcesoRepository,
                        ProcesoRepository procesoRepository, PermisoService permisoService,
                        HistorialService historialService,
-                          ModelMapper modelMapper) {
+                          ModelMapper modelMapper,
+            AccesoProcesoService accesoProcesoService) {
         this.arcoRepository = arcoRepository;
         this.nodoProcesoRepository = nodoProcesoRepository;
         this.procesoRepository = procesoRepository;
         this.permisoService = permisoService;
         this.historialService = historialService;
         this.modelMapper = modelMapper;
+        this.accesoProcesoService = accesoProcesoService;
     }
 
     @Transactional
@@ -118,6 +121,20 @@ public class ArcoService {
         historialService.registrar("Arco", arco.getId(), AccionHistorial.EDICION, usuario, proceso,
                 "Arco actualizado: " + origen.getNombre() + " -> " + destino.getNombre());
         return modelMapper.map(arco, ArcoResponse.class);
+    }
+
+    /** Lectura aislada por empresa: propietaria o invitada (HU-23); si no, 404. */
+    @Transactional(readOnly = true)
+    public ArcoResponse obtener(Long arcoId, Long empresaId) {
+        Arco arco = obtenerActivo(arcoId);
+        accesoProcesoService.validarLectura(arco.getProceso().getId(), empresaId);
+        return modelMapper.map(arco, ArcoResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArcoResponse> listarPorProceso(Long procesoId, Long empresaId) {
+        accesoProcesoService.validarLectura(procesoId, empresaId);
+        return listarPorProceso(procesoId);
     }
 
     @Transactional(readOnly = true)

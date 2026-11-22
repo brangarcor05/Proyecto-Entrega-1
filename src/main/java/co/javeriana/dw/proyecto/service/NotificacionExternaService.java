@@ -43,11 +43,13 @@ public class NotificacionExternaService {
     private final PermisoService permisoService;
     private final HistorialService historialService;
     private final ModelMapper modelMapper;
+    private final AccesoProcesoService accesoProcesoService;
 
     public NotificacionExternaService(EventoNotificacionExternaRepository notificacionRepository,
                                       ProcesoRepository procesoRepository, PoolRepository poolRepository,
                                       ActividadRepository actividadRepository,
-                                      PermisoService permisoService, HistorialService historialService, ModelMapper modelMapper) {
+                                      PermisoService permisoService, HistorialService historialService, ModelMapper modelMapper,
+            AccesoProcesoService accesoProcesoService) {
         this.notificacionRepository = notificacionRepository;
         this.procesoRepository = procesoRepository;
         this.poolRepository = poolRepository;
@@ -55,6 +57,7 @@ public class NotificacionExternaService {
         this.permisoService = permisoService;
         this.historialService = historialService;
         this.modelMapper = modelMapper;
+        this.accesoProcesoService = accesoProcesoService;
     }
 
     @Transactional
@@ -96,6 +99,20 @@ public class NotificacionExternaService {
         historialService.registrar("NotificacionExterna", notificacion.getId(), AccionHistorial.EDICION,
                 usuario, proceso, "Notificacion externa actualizada: " + notificacion.getNombre());
         return modelMapper.map(notificacion, NotificacionExternaResponse.class);
+    }
+
+    /** Lectura aislada por empresa: propietaria o invitada (HU-23); si no, 404. */
+    @Transactional(readOnly = true)
+    public NotificacionExternaResponse obtener(Long notificacionId, Long empresaId) {
+        EventoNotificacionExterna notificacion = obtenerActiva(notificacionId);
+        accesoProcesoService.validarLectura(notificacion.getProceso().getId(), empresaId);
+        return modelMapper.map(notificacion, NotificacionExternaResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificacionExternaResponse> listarPorProceso(Long procesoId, Long empresaId) {
+        accesoProcesoService.validarLectura(procesoId, empresaId);
+        return listarPorProceso(procesoId);
     }
 
     @Transactional(readOnly = true)

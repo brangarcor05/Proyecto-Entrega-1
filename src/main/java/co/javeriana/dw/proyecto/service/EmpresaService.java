@@ -57,6 +57,27 @@ public class EmpresaService {
         return modelMapper.map(empresa, EmpresaResponse.class);
     }
 
+    /**
+     * HU-23: directorio para elegir con quien compartir un proceso. Excluye a la propia
+     * empresa y solo expone datos de identificacion (nada de correos, telefonos ni el
+     * administrador), porque lo consulta cualquier usuario autenticado.
+     */
+    @Transactional(readOnly = true)
+    public List<EmpresaResponse> listarParaCompartir(Long empresaIdActual) {
+        return empresaRepository.findAll().stream()
+                .filter(empresa -> !empresa.getId().equals(empresaIdActual))
+                .sorted(Comparator.comparing(Empresa::getNombre, String.CASE_INSENSITIVE_ORDER))
+                .map(empresa -> {
+                    EmpresaResponse publica = new EmpresaResponse();
+                    publica.setId(empresa.getId());
+                    publica.setNombre(empresa.getNombre());
+                    publica.setRut(empresa.getRut());
+                    publica.setSector(empresa.getSector());
+                    return publica;
+                })
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public List<EmpresaResponse> listar() {
         return empresaRepository.findAll().stream()

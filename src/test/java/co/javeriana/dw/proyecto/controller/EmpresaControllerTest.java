@@ -5,6 +5,8 @@ import co.javeriana.dw.proyecto.dto.empresa.EmpresaResponse;
 import co.javeriana.dw.proyecto.exception.ManejadorGlobalExcepciones;
 import co.javeriana.dw.proyecto.exception.NombreDuplicadoException;
 import co.javeriana.dw.proyecto.exception.RecursoNoEncontradoException;
+import co.javeriana.dw.proyecto.entidad.RolUsuario;
+import co.javeriana.dw.proyecto.security.UsuarioAutenticado;
 import co.javeriana.dw.proyecto.service.EmpresaService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -17,13 +19,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -132,39 +141,60 @@ class EmpresaControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    /** Usuario autenticado de la empresa 1, igual que lo deja el filtro JWT. */
+    private RequestPostProcessor comoUsuarioDeLaEmpresa1() {
+        UsuarioAutenticado usuario = new UsuarioAutenticado(3L, 1L, "u@acme.com", RolUsuario.ADMIN);
+        return authentication(new UsernamePasswordAuthenticationToken(
+                usuario, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+    }
+
     @Test
-    void obtener_devuelve200_cuandoExiste() throws Exception {
+    void obtener_devuelve200_cuandoEsLaPropiaEmpresa() throws Exception {
         EmpresaResponse response = new EmpresaResponse();
         response.setId(1L);
         response.setNombre("Acme S.A.S.");
         when(empresaService.obtenerPorId(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/empresas/1")
+                        .with(comoUsuarioDeLaEmpresa1())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Acme S.A.S."));
     }
 
     @Test
+    void obtener_devuelve404_cuandoEsOtraEmpresa_yNoConsultaElServicio() throws Exception {
+        mockMvc.perform(get("/api/empresas/2")
+                        .with(comoUsuarioDeLaEmpresa1())
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(empresaService, never()).obtenerPorId(anyLong());
+    }
+
+    @Test
     void obtener_devuelve404_cuandoNoExiste() throws Exception {
-        when(empresaService.obtenerPorId(404L))
+        when(empresaService.obtenerPorId(1L))
                 .thenThrow(new RecursoNoEncontradoException("no existe"));
 
-        mockMvc.perform(get("/api/empresas/404")
+        mockMvc.perform(get("/api/empresas/1")
+                        .with(comoUsuarioDeLaEmpresa1())
                         .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void listar_devuelve200ConEmpresas() throws Exception {
+    void listar_devuelveLasOtrasEmpresas_segunLaEmpresaDelToken() throws Exception {
         EmpresaResponse response = new EmpresaResponse();
         response.setId(2L);
         response.setNombre("Beta S.A.S.");
-        when(empresaService.listar()).thenReturn(List.of(response));
+        when(empresaService.listarParaCompartir(1L)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/empresas"))
+        mockMvc.perform(get("/api/empresas").with(comoUsuarioDeLaEmpresa1()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(2))
                 .andExpect(jsonPath("$[0].nombre").value("Beta S.A.S."));
+
+        verify(empresaService).listarParaCompartir(1L);
     }
 }
