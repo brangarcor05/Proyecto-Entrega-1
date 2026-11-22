@@ -21,6 +21,7 @@ import co.javeriana.dw.proyecto.dto.rolproceso.CrearRolProcesoRequest;
 import co.javeriana.dw.proyecto.dto.rolproceso.RolProcesoResponse;
 import co.javeriana.dw.proyecto.dto.usuario.CrearUsuarioRequest;
 import co.javeriana.dw.proyecto.entidad.Empresa;
+import co.javeriana.dw.proyecto.entidad.RolUsuario;
 import co.javeriana.dw.proyecto.repository.EmpresaRepository;
 import co.javeriana.dw.proyecto.service.ArcoService;
 import co.javeriana.dw.proyecto.service.EmpresaService;
@@ -79,11 +80,15 @@ public class DatosPruebaJMeterConfig {
             CrearUsuarioRequest editor = new CrearUsuarioRequest();
             editor.setNombre("Editor de procesos");
             editor.setEmail("editor@jmeter.local");
+            editor.setPassword("Editor123!");
+            editor.setRolUsuario(RolUsuario.EDITOR);
             usuarioService.invitarUsuario(empresaEntidad, editor);
 
             CrearUsuarioRequest lector = new CrearUsuarioRequest();
             lector.setNombre("Usuario de consulta");
             lector.setEmail("lector@jmeter.local");
+            lector.setPassword("Lector123!");
+            lector.setRolUsuario(RolUsuario.LECTURA);
             usuarioService.invitarUsuario(empresaEntidad, lector);
 
             Long administradorId = empresa.getAdminUsuarioId();
@@ -93,6 +98,20 @@ public class DatosPruebaJMeterConfig {
                     "Solicitud de compra",
                     "Proceso completo para validar consultas y rendimiento con JMeter",
                     "Compras"), administradorId);
+
+            procesoService.guardarDiagrama(proceso.id(), """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                        id="Definitions_jmeter" targetNamespace="http://bpmn.io/schema/bpmn">
+                      <bpmn:process id="Proceso_jmeter" isExecutable="false">
+                        <bpmn:startEvent id="Inicio" name="Solicitud recibida"/>
+                        <bpmn:task id="Tarea" name="Revisar solicitud"/>
+                        <bpmn:endEvent id="Fin" name="Compra finalizada"/>
+                        <bpmn:sequenceFlow id="F1" sourceRef="Inicio" targetRef="Tarea"/>
+                        <bpmn:sequenceFlow id="F2" sourceRef="Tarea" targetRef="Fin"/>
+                      </bpmn:process>
+                    </bpmn:definitions>
+                    """, administradorId);
 
             procesoService.crear(new CrearProcesoRequest(
                     empresa.getId(),

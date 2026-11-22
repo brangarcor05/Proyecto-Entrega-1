@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Resultados generados por JMeter ###
+pruebas-carga/resultados/
+jmeter.log
