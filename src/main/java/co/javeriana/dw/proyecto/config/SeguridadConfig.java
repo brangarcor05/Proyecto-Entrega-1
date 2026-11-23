@@ -2,6 +2,7 @@ package co.javeriana.dw.proyecto.config;
 
 import co.javeriana.dw.proyecto.security.JwtAuthenticationFilter;
 import co.javeriana.dw.proyecto.security.JwtService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,11 @@ public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService)
         .csrf(csrf -> csrf.disable())
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(a -> a
+            // Respuesta de error interna de Spring Boot (/error). Cuando un endpoint
+            // lanza una excepcion, Spring reenvia la peticion a /error sin el token; si
+            // esa ruta exige autenticacion, el 400/500 real llega al cliente como 401.
+            // No abre ningun endpoint: solo deja que se entregue el error verdadero.
+            .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
             // Registro de empresa (HU-01) y los tres endpoints de sesion (HU-03)
             .requestMatchers(HttpMethod.POST, "/api/empresas",
                     "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
