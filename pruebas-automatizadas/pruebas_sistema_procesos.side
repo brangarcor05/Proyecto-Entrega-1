@@ -1,0 +1,3233 @@
+{
+  "id": "dd9f5596-7373-4210-b60b-efb479ca9d8d",
+  "version": "3.0",
+  "name": "Sistema de Gestión de Procesos multiempresa",
+  "url": "https://google.com",
+  "urls": [
+    "http://www.google.com"
+  ],
+  "plugins": [],
+  "suites": [
+    {
+      "id": "dff36ede-f19c-4f2a-b1ed-4da40e34115b",
+      "name": "SU02 - Acceso a URL, login empleado y logout",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "c939fc0e-d467-4aaa-b064-e6d08cb62b8b"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "446289f6-191b-47ac-bdb3-926d8b85b80c",
+      "name": "SU01 - Acceso a URL, login admin y logout",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "a2334399-2096-4dbc-bdbe-858828375579",
+      "name": "SU06 - Filtrar proceso admin",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "ea68d155-706c-43b6-ad1b-309ecf9421ad"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "e866be0d-1772-42e9-bc1f-93fade3c52fb",
+      "name": "SU05 - Gestionar roles de proceso admin",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "293ec904-a45e-4efb-a8ef-9fd97237732a",
+        "c234f6a7-a12b-4920-b391-45070d0b7734"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "e117600e-5856-4f79-91e0-f8522e8f5e78",
+      "name": "SU03 - Cambiar rol de acceso",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "e4d8693c-c67d-444a-82e7-02967817a0f2"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "e3e81625-05c4-4952-9ab8-cf040527bb21",
+      "name": "SU04 - Crear y gestionar procesos admin",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "7aa05eaa-7a9b-409b-be2c-bf78fa0acc0c",
+        "bbea41b8-67a1-4869-8e7a-e3fb21d8ec9d"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "3fcaf6da-fb7c-43c5-bea2-9d3ad3e45def",
+      "name": "SU07 - Gestión de Pools en proceso",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "bea086e3-50c9-45aa-8520-381f457ada2e",
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "4450c3e3-5d3e-44c2-ba0f-6d247b0b3ffe",
+      "name": "SU08 - Gestión de Lanes por Pool",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "fcd631c4-681a-48e4-a2c8-497aae5b5c5c"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "963d3cbb-7485-4686-bd01-735749c07c14",
+      "name": "SU09 - Gestión de Actividades BPMN",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "770a5135-652c-4a66-884b-37c09d0562c0"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "5c1f9777-f015-43ad-a9cd-35fd8e743b1d",
+      "name": "SU10 - Gestión de Gateways BPMN",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+        "a0079338-6676-46a2-a867-2a8a8ce477b7"
+      ],
+      "timeout": 30000
+    },
+    {
+      "id": "1820214d-83d7-4c79-b573-473bc4c56b88",
+      "name": "SU11 - Gestión de Mensajes de Envío y Recepción",
+      "persistSession": false,
+      "parallel": false,
+      "tests": [
+        "cd95d0fc-5a6f-401a-95fc-83c0e6ba348a",
+        "6010ab10-6ae6-4ad7-b422-f7d3ac80224c"
+      ],
+      "timeout": 30000
+    }
+  ],
+  "tests": [
+    {
+      "id": "c939fc0e-d467-4aaa-b064-e6d08cb62b8b",
+      "name": "Login empleado",
+      "commands": [
+        {
+          "command": "open",
+          "target": "https://twelve-curtain-recital.ngrok-free.dev/login",
+          "value": "",
+          "id": "e2b553fe-6181-4a83-9c82-ee01ac1001f2",
+          "comment": ""
+        },
+        {
+          "command": "click",
+          "target": "css=.campo:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c1830d46-70da-429a-8242-d86065271521",
+          "targets": [
+            [
+              "css=.campo:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='email'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-valid",
+          "value": "ana@acme.com",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "78b7ec58-84aa-4744-b0a8-d258e1a4d389",
+          "targets": [
+            [
+              "css=.ng-valid",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='email'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e9da1a99-0ee4-4e53-b68a-fad602296742",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='password'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-untouched",
+          "value": "claveSegura123",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e91d92c7-4c47-4130-ab14-c24186723587",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='password'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c1443351-1b6c-45db-beb0-87ba817c49d9",
+          "targets": [
+            [
+              "css=.btn",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Ingresar '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Ingresar')]",
+              "xpath:innerText"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6010ab10-6ae6-4ad7-b422-f7d3ac80224c",
+      "name": "Login admin",
+      "commands": [
+        {
+          "id": "211867a0-822c-444a-98ec-29eccf56e634",
+          "command": "open",
+          "target": "https://twelve-curtain-recital.ngrok-free.dev/login",
+          "value": ""
+        },
+        {
+          "command": "click",
+          "target": "css=.campo:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "fb937664-0edb-472b-a684-945465f422bf",
+          "targets": [
+            [
+              "css=.campo:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='email'])[1]",
+              "xpath:attributes"
+            ]
+          ],
+          "comment": "Seleccionar campo correo"
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-valid",
+          "value": "admin@acme.com",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a51052c5-bb79-4695-b176-1333507caf5c",
+          "targets": [
+            [
+              "css=.ng-valid",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='email'])[1]",
+              "xpath:attributes"
+            ]
+          ],
+          "comment": "Ingresar con correo admin"
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "2099999f-05f9-4ee7-aaab-69b15c21f879",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='password'])[1]",
+              "xpath:attributes"
+            ]
+          ],
+          "comment": "Seleccionar campo contraseña"
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-untouched",
+          "value": "claveSegura123",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c7f74955-01b2-4648-98eb-dbad603fd3b9",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='password'])[1]",
+              "xpath:attributes"
+            ]
+          ],
+          "comment": "Escribir constraseña"
+        },
+        {
+          "command": "click",
+          "target": "css=.btn",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f5143804-4c73-4dad-b4c4-ba4a74bcc67c",
+          "targets": [
+            [
+              "css=.btn",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Ingresar '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Ingresar')]",
+              "xpath:innerText"
+            ]
+          ],
+          "comment": "Click en botón Ingresar"
+        }
+      ]
+    },
+    {
+      "id": "7aa05eaa-7a9b-409b-be2c-bf78fa0acc0c",
+      "name": "Ingresar a procesos y crear uno",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Ver procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "2277bad2-db08-4851-bc89-3bd09696217a",
+          "targets": [
+            [
+              "linkText=Ver procesos",
+              "linkText"
+            ],
+            [
+              "css=.btn--secundario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[2]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Ver procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Crear proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "ea1868a0-a79a-4291-95c0-e5bdd0b3b1b6",
+          "targets": [
+            [
+              "linkText=Crear proceso",
+              "linkText"
+            ],
+            [
+              "css=.boton-primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Crear proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/nuevo')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Crear proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1a78bcfd-0f33-4d1d-a6f0-22f1e9d89e4a",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-valid",
+          "value": "Nvo proceso",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1523bf29-073b-49c9-b738-11b5a93464e5",
+          "targets": [
+            [
+              "css=.ng-valid",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "5c8411a0-5f4c-4007-835e-d8e6bc3a1762",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "Prueba de nuevo proceso",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "06f57827-51af-4e75-901b-f5330bef8e80",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c1be739f-49d9-4a6e-9b03-683f63c3f5d3",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label:nth-child(3) > .ng-touched",
+          "value": "Prueba",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c579ae94-7f87-48cb-8116-bc19bfe98fcb",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-touched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "83b07e41-c6ca-41b2-8652-0277ca61cd34",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Crear proceso '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Crear proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ea68d155-706c-43b6-ad1b-309ecf9421ad",
+      "name": "filtrar",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "5974e999-f1cb-4a7f-a61d-40d99e3c5b3b",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c34a2d70-1acb-49d4-b2ad-87de44cdbcd9",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='search'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label > .ng-dirty",
+          "value": "crear carros",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "36108ce5-2825-4bf3-92af-c9684d03ba6e",
+          "targets": [
+            [
+              "css=label > .ng-dirty",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='search'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(3) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "3eb4b43a-60f1-4145-a21c-ef1c9c801289",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='search'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label:nth-child(3) > .ng-untouched",
+          "value": "carros",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7888791f-9160-46c0-ae79-f9e682deee49",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='search'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.filtros__acciones > button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "cf635970-f2a5-4120-9162-5d6de74b355c",
+          "targets": [
+            [
+              "css=.filtros__acciones > button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Buscar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Buscar')]",
+              "xpath:innerText"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "293ec904-a45e-4efb-a8ef-9fd97237732a",
+      "name": "Crear y eliminar rol",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Roles de proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a85f55d5-1f37-4ee0-9a6a-c52fe503a625",
+          "targets": [
+            [
+              "linkText=Roles de proceso",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(2)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Roles de proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/roles-proceso')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Roles de proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Crear rol de proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "0de1fb0d-0bf4-4c42-a8f1-3af1f8b41576",
+          "targets": [
+            [
+              "linkText=Crear rol de proceso",
+              "linkText"
+            ],
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Crear rol de proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/roles-proceso/nuevo')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Crear rol de proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "45c40309-dc62-438a-98d2-eb68d09d7b75",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Coordi",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "eca7d70f-9f36-416c-949a-589522ecf989",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d4c98f22-249f-4cf5-88b2-8ac840de3798",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-untouched",
+          "value": "Guía y coordina",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d4a91c8a-f3f0-4457-bbb1-5c56787e31ac",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "24d57ba5-3469-4775-ad92-3fd1f8a7e3a3",
+          "targets": [
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Crear rol '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Crear rol')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=tr:nth-child(1) .btn--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1d3ecabc-8a8b-4444-9e9c-d2947dae97bf",
+          "targets": [
+            [
+              "css=tr:nth-child(3) .btn--peligro",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Eliminar '])[3]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "d333bb26-d6b5-4fd1-a3ea-f65438e1d627",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c234f6a7-a12b-4920-b391-45070d0b7734",
+      "name": "Editar rol",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Roles de proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a6a17b8f-cf30-489e-9834-2d02d52839a3",
+          "targets": [
+            [
+              "linkText=Roles de proceso",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(2)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Roles de proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/roles-proceso')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Roles de proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "mouseOver",
+          "target": "linkText=Roles de proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "0691ae42-9700-4167-bc18-a72c9fbe5c5a",
+          "targets": [
+            [
+              "linkText=Roles de proceso",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(2)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Roles de proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/roles-proceso')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Roles de proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Editar",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e43aa427-f072-4125-972c-aedc8c153d0c",
+          "targets": [
+            [
+              "linkText=Editar",
+              "linkText"
+            ],
+            [
+              "css=tr:nth-child(1) .btn--secundario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Editar')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/roles-proceso/3/editar')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Editar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.pagina-formulario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a685abb1-ff53-4d9a-9b2f-3f6f27e6879b",
+          "targets": [
+            [
+              "css=.pagina-formulario",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=textarea[formcontrolname=\"descripcion\"]",
+          "value": "trabaja",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1eb06a89-82cf-47a2-9683-3e666333fecd",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "5ecb674c-ae8d-4f6e-a2c0-e5eebbb9851d",
+          "targets": [
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Actualizar rol '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Actualizar rol')]",
+              "xpath:innerText"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e4d8693c-c67d-444a-82e7-02967817a0f2",
+      "name": "cambiar rol de acceso",
+      "commands": [
+        {
+          "command": "click",
+          "target": "css=app-tarjeta-usuario:nth-child(2) select",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7ef0c36f-001c-4520-8de2-6784afe2bf1f",
+          "targets": [
+            [
+              "css=app-tarjeta-usuario:nth-child(2) select",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=app-tarjeta-usuario:nth-child(2) select",
+          "value": "label=EDITOR",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c09e40e3-b1ce-4bae-92f6-f8d5285b8262",
+          "targets": [
+            [
+              "css=app-tarjeta-usuario:nth-child(2) select",
+              "css:finder"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbea41b8-67a1-4869-8e7a-e3fb21d8ec9d",
+      "name": "Eliminar proceso",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "9e2d5b8d-6099-438d-ad31-c99117bb5e55",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(3) .boton--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "709ba172-ab1c-4fef-aae3-8c5b14b9f5cb",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(3) .boton--peligro",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Eliminar '])[3]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "8a0587c8-a564-4353-9638-3395eabc0dc2",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bea086e3-50c9-45aa-8520-381f457ada2e",
+      "name": "CRUD Pool",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f8ba61a8-97c1-47a8-b7d9-e2ef1f97eb2a",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "335523fa-4c24-48b6-8779-c3958bc7d7d0",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver detalle')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Pools",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "fb6d6636-c24d-4548-89fe-8328e3c5fb17",
+          "targets": [
+            [
+              "linkText=Pools",
+              "linkText"
+            ],
+            [
+              "css=footer > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Pools')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/pools')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Pools')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Crear pool",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "de27555e-df2f-4da9-be98-c1f0b12191e0",
+          "targets": [
+            [
+              "linkText=Crear pool",
+              "linkText"
+            ],
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Crear pool')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/pools/nuevo')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Crear pool')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "8c047f11-9445-4811-a86e-fd60be08a93a",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Flujo 2",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "10348042-0ecc-4e4a-96ad-4f498fa3443b",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "b99f6ea9-4aa6-4adf-9c75-bf0facffee62",
+          "targets": [
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Crear pool '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Crear pool')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-pool:nth-child(2) .btn--secundario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "3405f283-762b-4f30-8e1a-a1840aa4024b",
+          "targets": [
+            [
+              "css=.tarjeta-pool:nth-child(2) .btn--secundario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Editar')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/pools/9/editar')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,41)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "40477a6f-d636-4526-b23b-8d5edac6fde1",
+          "targets": [
+            [
+              "window.scrollTo(0,41)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.campo > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "3853fb8c-f403-4f2e-94b8-d0ad430261ef",
+          "targets": [
+            [
+              "css=.campo > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Flujo 0",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "18ead203-96dc-4584-9943-43b1c35f62e6",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7643579f-5cd4-4558-90e2-bec3a97bf4b1",
+          "targets": [
+            [
+              "css=.btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Actualizar pool '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Actualizar pool')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "370df832-63d3-4e4f-ae72-eb9b7257dad7",
+          "targets": [
+            [
+              "css=.btn--peligro",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Eliminar '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Eliminar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "b4f0c20e-1748-4643-b21a-686ec814dbb6",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fcd631c4-681a-48e4-a2c8-497aae5b5c5c",
+      "name": "CRUD Lane",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Usuarios",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "2267b444-7d71-4d2f-b65d-98c5918c3055",
+          "targets": [
+            [
+              "linkText=Usuarios",
+              "linkText"
+            ],
+            [
+              "css=a:nth-child(3)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Usuarios')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/usuarios')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Usuarios')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "5a176f8c-c53d-4fcf-afc6-5bebf09ed7d3",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "mouseOver",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "15bf97e3-6f17-42b2-96db-c4ab9b07dced",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "822091df-cde3-4815-99b0-6864b8212985",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver detalle')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Pools",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "034a2c92-867c-489c-a9bd-4c87644f32db",
+          "targets": [
+            [
+              "linkText=Pools",
+              "linkText"
+            ],
+            [
+              "css=footer > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Pools')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/pools')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Pools')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-pool:nth-child(2) .btn--secundario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "2ca4c57c-1142-4811-8a16-d628454148ab",
+          "targets": [
+            [
+              "css=.tarjeta-pool:nth-child(2) .btn--secundario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Editar')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/pools/11/editar')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,192)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f451a5fd-0a26-42ef-9cec-5f12cf957da8",
+          "targets": [
+            [
+              "window.scrollTo(0,192)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.lanes__encabezado > .btn",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a6fb3f77-25e2-4b61-b4c3-f9466cf058fd",
+          "targets": [
+            [
+              "css=.lanes__encabezado > .btn",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Agregar lane '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Agregar lane')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "mouseOver",
+          "target": "css=.lanes__encabezado > .btn",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1fe598b7-cef4-4a6d-ab9c-9a3f5745c027",
+          "targets": [
+            [
+              "css=.lanes__encabezado > .btn",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Agregar lane '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Agregar lane')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.lanes",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "b9fb95d8-5a84-4dda-8a7e-4f89a4a7eafe",
+          "targets": [
+            [
+              "css=.lanes",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1c163261-48df-47a1-bf4a-2ac1b1a65b56",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "label=Empleado",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c347926c-e7bb-49b7-8e5d-64a5058b8ac8",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.acciones:nth-child(2) > .btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "852affef-a1d1-4713-b56c-5e1b7d28a090",
+          "targets": [
+            [
+              "css=.acciones:nth-child(2) > .btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Agregar lane '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Agregar lane')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn:nth-child(3)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "97d8238b-4733-457f-a4ef-e9b97ec51118",
+          "targets": [
+            [
+              "css=.btn:nth-child(3)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()='Editar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Editar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.lanes__formulario .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d9470a73-f73e-4ff4-8e29-7943262b9ed0",
+          "targets": [
+            [
+              "css=.lanes__formulario .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=.lanes__formulario .ng-untouched",
+          "value": "label=Recursos humanos",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "bbe01d8f-9cca-4c41-9b9d-8c74d1c08434",
+          "targets": [
+            [
+              "css=.lanes__formulario .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.acciones:nth-child(2) > .btn--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "107ed76e-1135-4d04-87fe-f2898bdb5c13",
+          "targets": [
+            [
+              "css=.acciones:nth-child(2) > .btn--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()=' Actualizar lane '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Actualizar lane')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.btn--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "828e13c3-2a0f-4469-8a32-c02b36d10c44",
+          "targets": [
+            [
+              "css=.btn--peligro",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='button' and text()=' Eliminar '])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Eliminar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "c3140c0d-91c5-4876-bc30-f77af5414028",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "770a5135-652c-4a66-884b-37c09d0562c0",
+      "name": "CRUD Actividad",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "9b4b1f89-4030-44e2-8526-9190f4f6b59f",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "def295b7-8739-43c2-83d1-2eab883ef387",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver detalle')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Actividades",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7148bf89-752d-4584-98ff-a3930a8655b9",
+          "targets": [
+            [
+              "linkText=Actividades",
+              "linkText"
+            ],
+            [
+              "css=.boton:nth-child(5)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Actividades')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/actividades')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Actividades')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.boton--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d6d2aeaf-d4ff-43ac-a77d-bf152df490d3",
+          "targets": [
+            [
+              "css=.boton--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=//button[contains(.,'+ Nueva Actividad')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,17)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f74b5bc3-27ab-4385-a894-9e1eae4584dd",
+          "targets": [
+            [
+              "window.scrollTo(0,17)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "2e3da75d-3358-4e83-ab71-28305a0051c6",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Decir colores",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1026b688-e45a-47fa-876d-35fb07cbf2c5",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "8067515f-ba8c-4a46-bed8-45dcaa972afa",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "label=Acme S.A.S.",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7ec1eadb-01bd-4f96-931d-6b5feaf6a589",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,167)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c0b92598-7dae-4a8f-8541-072b0429d1fc",
+          "targets": [
+            [
+              "window.scrollTo(0,167)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d6a421da-dcbb-47de-99e5-4c8c463ed160",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "label=Diseñador",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "19a13454-5603-43e6-847c-088d73b82d78",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "0c51fce7-6a4b-4dcd-8756-dedf2a7ec12b",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "Tarea de usuario",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "dd1b8692-7e56-4d4d-89eb-fb3f50771be7",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e41a63c0-e1bb-4f07-aa9c-5ac0d6149bdd",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-untouched",
+          "value": "colores carro",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e4c07784-4e3f-4184-9749-97b55272bbc5",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c1535cf7-dcf6-4b87-95ed-b613c811e4c3",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Guardar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Guardar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-elemento:nth-child(5) .boton--secundario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "fbafba1f-97df-4743-8157-7b6356976323",
+          "targets": [
+            [
+              "css=.tarjeta-elemento:nth-child(5) .boton--secundario",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,340.5)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "43457c9e-0812-4eb1-bcb2-6d01bea5c005",
+          "targets": [
+            [
+              "window.scrollTo(0,340.5)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c94312ba-af0b-4152-93f3-ae0a05278a8b",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "ccc2fea4-e5c2-49db-95a1-f7f3da3f407f",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "doubleClick",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d1e9bc5b-f5f4-4a9a-ac47-0d5dda409662",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Tarea de admin",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "72e809e7-1cb9-4de2-a1d5-91d7973b4733",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f6d31673-ddad-4b8d-9478-72c039e5c00e",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Guardar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Guardar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-elemento:nth-child(5) .boton--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d25eb1a1-f627-4f50-a696-d3d13f383719",
+          "targets": [
+            [
+              "css=.tarjeta-elemento:nth-child(5) .boton--peligro",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "61b1459c-7c57-49cd-a235-56183120658b",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a0079338-6676-46a2-a867-2a8a8ce477b7",
+      "name": "CRUD Gateway",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "97177b90-bc05-4312-910f-8fff1b84ab96",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "mouseOver",
+          "target": "linkText=Crear proceso",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "af944804-d4ed-42dd-b7e3-cd833ba122e7",
+          "targets": [
+            [
+              "linkText=Crear proceso",
+              "linkText"
+            ],
+            [
+              "css=.boton-primario",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Crear proceso')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/nuevo')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Crear proceso')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "6648e68e-d801-4d71-929a-37c5d928def3",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver detalle')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Gateways",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "782e37cf-0b35-461c-940f-a38e800d4a6f",
+          "targets": [
+            [
+              "linkText=Gateways",
+              "linkText"
+            ],
+            [
+              "css=.boton:nth-child(6)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Gateways')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/gateways')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Gateways')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "mouseOver",
+          "target": "css=.boton--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "65172e77-19f8-475e-9cac-8a6ff72706c7",
+          "targets": [
+            [
+              "css=.boton--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=//button[contains(.,'+ Nuevo Gateway')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.boton--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d01c8558-a806-4766-9d1f-3d6afac289b0",
+          "targets": [
+            [
+              "css=.boton--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=//button[contains(.,'+ Nuevo Gateway')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "10ca47d3-4b6f-47c7-b052-ee4cc653c5a3",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Decisión paleta",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a4c5beba-7d58-44c2-ae74-914c76bf5ad3",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "812d6c72-ecdf-4f1b-aeb1-b5b2478d90cd",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "label=INCLUSIVO",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "f787c9ac-9491-40b4-a8c6-efba3f9b888a",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(3) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a82a09e3-dd19-4713-860e-8cf3a50c5077",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=label:nth-child(3) > .ng-untouched",
+          "value": "label=Acme S.A.S.",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a603bd3d-6245-4b03-8d9e-a6777f19e372",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "8e5a4e64-cd7c-49d9-b562-4756b2a05c88",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "61866e13-1fcb-4184-9bb4-a03e7e37c069",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=select[formcontrolname=\"laneId\"]",
+          "value": "label=Diseñador",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c315cdea-a073-4af6-ba34-8689744d6839",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "db657283-f531-436a-a6f1-ae8e981c5384",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Guardar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Guardar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-elemento:nth-child(3) .boton--secundario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "1db98f59-0393-4e96-9434-98b1d44dce43",
+          "targets": [
+            [
+              "css=.tarjeta-elemento:nth-child(3) .boton--secundario",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "runScript",
+          "target": "window.scrollTo(0,76)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "8cb6d118-d009-446e-a8d4-eb780d3a0b83",
+          "targets": [
+            [
+              "window.scrollTo(0,76)",
+              ""
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "a5ad3a29-050d-4fca-814b-9259f53fd0cc",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "63e8a856-cc3f-4819-8539-35c69684d140",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "e3e09d99-43c7-46e6-ad31-8debf89cad0a",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "doubleClick",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d92f6262-3852-42b8-a734-e38f9026c982",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Decisión colores",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "4232d11a-1861-481f-aca7-6d08fe968f87",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "60b5fca5-159e-438c-a0da-a2ebf2ab3aa9",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=.ng-invalid:nth-child(1)",
+          "value": "label=Diseñador",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "ab6c7775-8e1c-4c1e-8ae1-dcf8e7af9e34",
+          "targets": [
+            [
+              "css=.ng-invalid:nth-child(1)",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d3819256-42ad-4be0-ae8e-19aa5ab99b55",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Guardar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Guardar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.tarjeta-elemento:nth-child(3) .boton--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "7cdc64d2-b03f-4b67-9d62-a3b86e5038c6",
+          "targets": [
+            [
+              "css=.tarjeta-elemento:nth-child(3) .boton--peligro",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "0eeacaae-1c95-4998-a7a7-79eece50c7e9",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cd95d0fc-5a6f-401a-95fc-83c0e6ba348a",
+      "name": "CRUD Mensajes",
+      "commands": [
+        {
+          "command": "click",
+          "target": "linkText=Procesos",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "0b14bb4b-6b52-4064-b94c-ca597198b984",
+          "targets": [
+            [
+              "linkText=Procesos",
+              "linkText"
+            ],
+            [
+              "css=nav > a:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Procesos')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Procesos')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "6bc19434-0a9a-431a-81c7-cb620a6ef809",
+          "targets": [
+            [
+              "css=app-proceso-card:nth-child(2) .boton:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Ver detalle')])[2]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4')])[1]",
+              "xpath:href"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "linkText=Mensajes de Envío",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "cfb1c166-f34e-44f8-a3cf-cf7d0cd350b8",
+          "targets": [
+            [
+              "linkText=Mensajes de Envío",
+              "linkText"
+            ],
+            [
+              "css=.boton:nth-child(7)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//a[contains(text(),'Mensajes de Envío')])[1]",
+              "xpath:link"
+            ],
+            [
+              "xpath=(//a[contains(@href, '/procesos/4/mensajes-envio')])[1]",
+              "xpath:href"
+            ],
+            [
+              "xpath=//a[contains(.,'Mensajes de Envío')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.boton--primario",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "463cebb4-f2ed-4c17-ae5b-47ea64381409",
+          "targets": [
+            [
+              "css=.boton--primario",
+              "css:finder"
+            ],
+            [
+              "xpath=//button[contains(.,'+ Nuevo Mensaje Envío')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(1) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d94177ac-a711-4cdc-bcbe-507f6f0dddb4",
+          "targets": [
+            [
+              "css=label:nth-child(1) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=.ng-dirty:nth-child(1)",
+          "value": "Enviar RGB",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c81e15c0-3ed9-47a5-8c3d-debfed4a07aa",
+          "targets": [
+            [
+              "css=.ng-dirty:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[1]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "dd969430-8edf-4453-9612-e42676efe84a",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "type",
+          "target": "css=label:nth-child(2) > .ng-untouched",
+          "value": "inventario123",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "504e5dfb-40ed-47c5-beb5-831adf7459e9",
+          "targets": [
+            [
+              "css=label:nth-child(2) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=(//input[@type='text'])[2]",
+              "xpath:attributes"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(3) > .ng-pristine",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "d66a6a8e-7edf-411b-9edf-8e050d08f819",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-pristine",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=label:nth-child(3) > .ng-pristine",
+          "value": "label=Acme S.A.S.",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "9d45af45-1572-4896-b9b4-89b15de62fe5",
+          "targets": [
+            [
+              "css=label:nth-child(3) > .ng-pristine",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "9c455394-d070-47dd-a481-23819a0ca494",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ],
+            [
+              "xpath=//select[contains(.,'-- Selecciona un Lane --')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=label:nth-child(4) > .ng-untouched",
+          "value": "label=Diseñador",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "c89ab606-00f5-4c13-b6fa-31124c8c0497",
+          "targets": [
+            [
+              "css=label:nth-child(4) > .ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.ng-untouched",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "dc79e677-9e69-49b5-becd-b8aa22ae7c7d",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "select",
+          "target": "css=select[formcontrolname=\"poolDestinoId\"]",
+          "value": "label=Pool",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "8b6535cc-f4b8-48d8-9fb9-84d23d1a99d1",
+          "targets": [
+            [
+              "css=.ng-untouched",
+              "css:finder"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=button:nth-child(1)",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "433cfcc2-8c27-4ccb-b777-9c55b5ef3155",
+          "targets": [
+            [
+              "css=button:nth-child(1)",
+              "css:finder"
+            ],
+            [
+              "xpath=(//button[@type='submit' and text()='Guardar'])[1]",
+              "xpath:attributes"
+            ],
+            [
+              "xpath=//button[contains(.,'Guardar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "click",
+          "target": "css=.boton--peligro",
+          "value": "",
+          "insertBeforeLastCommand": false,
+          "frameLocation": "root",
+          "winHandleId": "root",
+          "id": "9e8ea5de-6950-4ff0-b91e-7d4300eb4824",
+          "targets": [
+            [
+              "css=.boton--peligro",
+              "css:finder"
+            ],
+            [
+              "xpath=//button[contains(.,'Eliminar')]",
+              "xpath:innerText"
+            ]
+          ]
+        },
+        {
+          "command": "acceptConfirmation",
+          "target": true,
+          "value": "",
+          "id": "ce5cc2da-b634-4270-a443-af22053231c7",
+          "targets": [
+            [
+              true,
+              ""
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "snapshot": {
+    "dependencies": {},
+    "tests": [],
+    "jest": {
+      "extraGlobals": []
+    }
+  },
+  "delay": 200
+}
