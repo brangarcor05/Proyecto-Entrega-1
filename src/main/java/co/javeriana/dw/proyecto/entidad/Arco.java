@@ -21,6 +21,9 @@ public class Arco {
 
     private String condicion; 
 
+    @Column(name = "canvas_id", length = 100)
+    private String canvasId;
+
     @Column(nullable = false)
     private boolean activo = true;
 

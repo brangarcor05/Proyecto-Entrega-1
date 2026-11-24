@@ -1,0 +1,101 @@
+# CI/CD del backend (Spring Boot).
+#
+# - CI: en cada push y en cada Pull Request a developer o main se compila y se
+#   corren todas las pruebas (mvn verify). Si una prueba falla, el workflow queda en rojo.
+# - CD: solo cuando el codigo llega a main (rama que se evalua y se despliega):
+#   se construye la imagen Docker, se publica en Docker Hub con el hash del commit
+#   y se despliega en Kubernetes desde un runner self-hosted.
+#
+# Secretos de GitHub necesarios (Settings > Secrets and variables > Actions):
+#   DOCKERHUB_USERNAME  usuario de Docker Hub (brangarcor05)
+#   DOCKERHUB_TOKEN     token de acceso de Docker Hub (no la contrasena)
+# Ningun secreto de la aplicacion (base de datos, JWT) va en este archivo: el
+# cluster los lee del Secret app-secrets, que se crea una sola vez a mano.
+
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [developer]
+  pull_request:
+    branches: [developer]
+  workflow_dispatch:            # boton manual en la pestana Actions
+
+env:
+  IMAGE: brangarcor05/backend-procesos
+
+jobs:
+  pruebas:
+    name: Compilar y probar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Compilar y ejecutar las pruebas
+        run: ./mvnw -B verify
+
+      - name: Guardar reportes de pruebas y cobertura
+        if: always()            # tambien cuando fallan, para poder revisarlos
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-backend
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          if-no-files-found: ignore
+
+  imagen:
+    needs: pruebas
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Iniciar sesion en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # La misma imagen sale con dos tags: el hash del commit (version exacta,
+      # la que se despliega) y latest (comodidad para pruebas locales).
+      - name: Construir y publicar
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+
+  despliegue:
+    name: Desplegar en Kubernetes
+    needs: imagen
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
+    runs-on: [self-hosted]   # runner instalado en la VM de Ubuntu del cluster
+    steps:
+      - uses: actions/checkout@v4
+
+      # Solo se aplica backend.yaml. secret.yaml NO se aplica desde aqui: tiene
+      # credenciales y el Secret app-secrets se administra a mano en el cluster.
+      # El manifiesto del repo indica una etiqueta fija (v1). Antes de aplicarlo se
+      # reemplaza por la imagen de este commit: asi hay un solo rolling update y el
+      # clúster nunca vuelve, ni por un momento, a la version del manifiesto.
+      - name: Usar la imagen de este commit en el manifiesto
+        run: |
+          sed -i "s#image: ${{ env.IMAGE }}:.*#image: ${{ env.IMAGE }}:${{ github.sha }}#" backend.yaml
+          grep "image:" backend.yaml
+
+      - name: Aplicar el deployment
+        run: kubectl apply -f backend.yaml
+
+      - name: Esperar a que el pod nuevo quede listo
+        run: kubectl rollout status deployment/backend --timeout=300s
