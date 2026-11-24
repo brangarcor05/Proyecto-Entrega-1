@@ -16,9 +16,9 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: [developer, main]
+    branches: [developer]
   pull_request:
-    branches: [developer, main]
+    branches: [developer]
   workflow_dispatch:            # boton manual en la pestana Actions
 
 env:
@@ -53,9 +53,8 @@ jobs:
           if-no-files-found: ignore
 
   imagen:
-    name: Construir y publicar imagen
-    needs: pruebas              # no se publica nada si las pruebas fallan
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: pruebas
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,8 +79,8 @@ jobs:
   despliegue:
     name: Desplegar en Kubernetes
     needs: imagen
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, despliegue]   # runner instalado en la VM de Ubuntu del cluster
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/developer'
+    runs-on: [self-hosted]   # runner instalado en la VM de Ubuntu del cluster
     steps:
       - uses: actions/checkout@v4
 
